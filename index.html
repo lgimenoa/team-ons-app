@@ -275,10 +275,6 @@
                 </div>
             </section>
         </div>
-        
-        <div class="max-w-md mx-auto px-6 pb-40 text-center">
-             <button onclick="generateDummyData()" class="text-[10px] text-gray-300 font-bold border border-gray-200 p-2 rounded hover:text-blue-500 hover:border-blue-500">🛠 GENERAR DATOS DE PRUEBA</button>
-        </div>
     </main>
 
     <nav id="mobile-nav" class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around items-center pb-safe z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] hidden">
@@ -616,6 +612,57 @@
                     },
                     delete(id) { if(confirm("¿Dar de baja?")) { ONS.DataStore.deleteUser(id, confirm("¿Borrar historial también?")); this.render(); } }
                 },
+                Admin: {
+                    render() {
+                        try {
+                            const users = ONS.DataStore.listUsers();
+                            const logs = ONS.DataStore.state.logs.filter(l => !l.deleted);
+                            
+                            document.getElementById('adm-stat-users').textContent = users.length;
+                            document.getElementById('adm-stat-logs').textContent = logs.length;
+                            
+                            const activeThreshold = new Date(); 
+                            activeThreshold.setDate(activeThreshold.getDate() - 30);
+                            
+                            const activeUsers = users.filter(u => 
+                                logs.some(l => l.userId === u.userId && l.date && new Date(l.date) > activeThreshold)
+                            ).length;
+                            
+                            document.getElementById('adm-stat-active').textContent = activeUsers;
+                            
+                            const today = new Date();
+                            const currMonthKey = ONS.Utils.fmtMonth(today);
+                            
+                            const monMap = {};
+                            logs.forEach(l => { 
+                                if(!l.date) return;
+                                const k = l.date.substring(0,7); 
+                                if(k !== currMonthKey) monMap[k] = (monMap[k]||0)+1; 
+                            });
+                            
+                            const monKeys = Object.keys(monMap).sort();
+                            const dayMap = {};
+                            
+                            logs.forEach(l => { 
+                                if(l.date && l.date.startsWith(currMonthKey)) dayMap[l.date] = (dayMap[l.date]||0)+1; 
+                            });
+                            
+                            const daysInMonth = ONS.Utils.getDaysInMonth(today.getMonth()+1, today.getFullYear());
+                            const dayKeys = Array.from({length: daysInMonth}, (_, i) => `${currMonthKey}-${String(i+1).padStart(2,'0')}`);
+                            
+                            this.drawChart('admChartMonth', 'bar', monKeys, monKeys.map(k=>monMap[k]), 'Actividad Mensual');
+                            this.drawChart('admChartDay', 'line', dayKeys.map(k=>k.slice(-2)), dayKeys.map(k=>dayMap[k]||0), 'Actividad Diaria');
+                        } catch(e) { console.error("Admin Render Error:", e); }
+                    },
+                    drawChart(id, type, labels, data, label) {
+                        try {
+                            const cv = document.getElementById(id); if(!cv) return;
+                            if (ONS.UI.charts[id]) ONS.UI.charts[id].destroy();
+                            const ctx = cv.getContext('2d');
+                            ONS.UI.charts[id] = new Chart(ctx, { type: type, data: { labels: labels, datasets: [{ label: label, data: data, backgroundColor: 'rgba(59, 130, 246, 0.5)', borderColor: '#2563eb', borderWidth: 1, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
+                        } catch(e) { console.error("Admin Chart Error:", e); }
+                    }
+                },
                 Reports: {
                     init() {
                         try {
@@ -645,7 +692,6 @@
                         const daysInMonth = ONS.Utils.getDaysInMonth(today.getMonth()+1, today.getFullYear());
                         const currKeys = Array.from({length: daysInMonth}, (_, i) => `${currMonthKey}-${String(i+1).padStart(2,'0')}`);
                         
-                        // CORRECCIÓN: Reactivados TODOS los gráficos
                         this.drawChart('repChartAttendMonth', 'bar', histKeys, histKeys.map(k=>attendMonth[k]?attendMonth[k].size:0), 'Días');
                         this.drawChart('repChartAttendDay', 'line', currKeys.map(k=>k.slice(-2)), currKeys.map(k=>attendDay[k]||0), 'Asistencia');
                         this.drawChart('repChartVolMonth', 'bar', histKeys, histKeys.map(k=>volMonth[k]||0), 'Registros');
@@ -689,47 +735,6 @@
             },
             Init() { try { ONS.DataStore.init(); lucide.createIcons(); const d = document.createElement('input'); d.setAttribute('type','date'); if (d.type != 'date') alert("Navegador antiguo. Usa Chrome/Safari."); } catch(e) { alert("Error crítico: " + e.message); } }
         };
-        
-        function generateDummyData() {
-            if(!confirm("Esto generará 5 usuarios y muchos datos de prueba. ¿Continuar?")) return;
-            const names = ["Carlos", "Ana", "Miguel", "Lucia", "David"];
-            const exIds = ["push_bp_flat", "leg_sq_gob", "pull_lat", "sh_press", "arm_curl"];
-            const users = [];
-            names.forEach((n, i) => {
-                const uid = ONS.Utils.uuid();
-                const u = { userId: uid, username: n + "_test", password: "123", firstName: n, lastName: "Test", chalet: (100+i).toString(), role: "USER", status: "ACTIVE", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-                ONS.DataStore.state.users.push(u);
-                users.push(uid);
-            });
-            const today = new Date();
-            users.forEach(uid => {
-                for (let d = 0; d < 15; d++) {
-                    const dateObj = new Date();
-                    dateObj.setDate(today.getDate() - (Math.floor(Math.random() * 30)));
-                    const dateStr = dateObj.toISOString().split('T')[0];
-                    for (let e = 0; e < 3; e++) {
-                        const exCatalog = ONS.Catalog.find(c => c.id === exIds[Math.floor(Math.random() * exIds.length)]);
-                        const series = [];
-                        for(let s=0; s<3; s++) series.push({ w: Math.floor(Math.random()*40)+10, r: Math.floor(Math.random()*5)+8 });
-                        ONS.DataStore.state.logs.push({
-                            logId: ONS.Utils.uuid(),
-                            userId: uid,
-                            date: dateStr,
-                            exerciseId: exCatalog.id,
-                            exerciseName: exCatalog.name,
-                            grupoMuscular: exCatalog.group,
-                            series: series,
-                            createdAt: dateObj.toISOString(),
-                            updatedAt: dateObj.toISOString(),
-                            deleted: false
-                        });
-                    }
-                }
-            });
-            ONS.DataStore.persist();
-            alert("Datos generados. Recarga la página.");
-            window.location.reload();
-        }
 
         window.addEventListener('DOMContentLoaded', ONS.Init);
     </script>
