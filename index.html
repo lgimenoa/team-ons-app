@@ -72,6 +72,7 @@
                 <button id="nav-btn-reports" onclick="ONS.UI.navigateTo('reports')" class="nav-btn px-4 py-2 rounded hover:bg-blue-800 text-blue-100 transition">Informes</button>
                 <button id="nav-btn-members" onclick="ONS.UI.navigateTo('members')" class="nav-btn px-4 py-2 rounded hover:bg-blue-800 text-blue-100 hidden">Miembros</button>
                 <button id="nav-btn-admin" onclick="ONS.UI.navigateTo('admin')" class="nav-btn px-4 py-2 rounded hover:bg-blue-800 text-yellow-300 hidden font-bold"><i data-lucide="shield" class="w-4 h-4 inline mr-1"></i>Admin</button>
+                <button onclick="ONS.UI.Help.open()" class="px-4 py-2 rounded hover:bg-blue-800 text-blue-100 transition flex items-center gap-1"><i data-lucide="circle-help" class="w-4 h-4"></i> Ayuda</button>
                 <div class="border-l border-blue-700 mx-2 h-6 self-center"></div>
                 <button onclick="ONS.Auth.logout()" class="px-4 py-2 rounded hover:bg-red-700 hover:text-white transition text-red-200">Salir</button>
             </nav>
@@ -183,9 +184,33 @@
                     <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm"><div class="text-[10px] text-green-600 font-bold uppercase tracking-wider">Activos</div><div id="adm-stat-active" class="text-2xl font-bold text-green-900 mt-1">0</div></div>
                     <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm col-span-2 md:col-span-1"><div class="text-[10px] text-purple-600 font-bold uppercase tracking-wider">Registros Totales</div><div id="adm-stat-logs" class="text-2xl font-bold text-purple-900 mt-1">0</div></div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
-                    <div class="bg-white p-4 rounded-3xl border border-gray-200 shadow-sm"><h4 class="text-sm font-bold text-gray-700 mb-3 ml-2">Por Mes</h4><div class="chart-container-sm"><canvas id="admChartMonth"></canvas></div></div>
-                    <div class="bg-white p-4 rounded-3xl border border-gray-200 shadow-sm"><h4 class="text-sm font-bold text-gray-700 mb-3 ml-2">Por Día</h4><div class="chart-container-sm"><canvas id="admChartDay"></canvas></div></div>
+                
+                <div class="bg-white rounded-3xl border border-gray-200 p-5 mb-6 shadow-sm">
+                    <h3 class="font-bold text-gray-800 mb-4 text-sm flex items-center gap-2"><i data-lucide="activity" class="w-4 h-4 text-purple-600"></i> Volumen de Actividad (Registros)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-2">Por Mes</h4>
+                            <div class="chart-container-sm"><canvas id="admChartMonth"></canvas></div>
+                        </div>
+                        <div class="border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-2">Mes en Curso: Por día</h4>
+                            <div class="chart-container-sm"><canvas id="admChartDay"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl border border-gray-200 p-5 mb-6 shadow-sm">
+                    <h3 class="font-bold text-gray-800 mb-4 text-sm flex items-center gap-2"><i data-lucide="users" class="w-4 h-4 text-blue-600"></i> Asistencia Global (Check-ins)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-2">Asistencia Histórica</h4>
+                            <div class="chart-container-sm"><canvas id="admChartAttendMonth"></canvas></div>
+                        </div>
+                        <div class="border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-2">Mes en Curso: Por día</h4>
+                            <div class="chart-container-sm"><canvas id="admChartAttendDay"></canvas></div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -218,7 +243,7 @@
                             <div class="chart-container-sm"><canvas id="repChartAttendMonth"></canvas></div>
                         </div>
                         <div class="border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-4">
-                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-2">Días este Mes</h4>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-2">Mes en Curso: Por día</h4>
                             <div class="chart-container-sm"><canvas id="repChartAttendDay"></canvas></div>
                         </div>
                     </div>
@@ -293,9 +318,10 @@
                 <i data-lucide="user" class="w-6 h-6 mb-1"></i>
                 <span class="text-[10px] font-bold">Perfil</span>
             </button>
-            <div id="profile-menu-mob" class="hidden absolute bottom-full right-2 mb-2 w-40 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col z-50">
-                <button onclick="ONS.UI.Members.openModal(ONS.Auth.user.userId); document.getElementById('profile-menu-mob').classList.add('hidden')" class="text-left px-4 py-3 text-sm font-medium hover:bg-gray-50 border-b">Mis Datos</button>
-                <button onclick="ONS.Auth.logout()" class="text-left px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50">Cerrar Sesión</button>
+            <div id="profile-menu-mob" class="hidden absolute bottom-full right-2 mb-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col z-50">
+                <button onclick="ONS.UI.Members.openModal(ONS.Auth.user.userId); document.getElementById('profile-menu-mob').classList.add('hidden')" class="text-left px-4 py-3 text-sm font-medium hover:bg-gray-50 border-b flex items-center gap-2"><i data-lucide="user-pen" class="w-4 h-4 text-gray-500"></i> Mis Datos</button>
+                <button onclick="ONS.UI.Help.open(); document.getElementById('profile-menu-mob').classList.add('hidden')" class="text-left px-4 py-3 text-sm font-medium hover:bg-gray-50 border-b flex items-center gap-2"><i data-lucide="circle-help" class="w-4 h-4 text-gray-500"></i> Ayuda Ejercicios</button>
+                <button onclick="ONS.Auth.logout()" class="text-left px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 flex items-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Cerrar Sesión</button>
             </div>
         </div>
     </nav>
@@ -331,6 +357,30 @@
         </div>
     </div>
 
+    <div id="modal-help" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-[70] backdrop-blur-sm px-4 py-6">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh]">
+            <div class="p-5 flex justify-between items-center border-b flex-shrink-0 bg-gray-50 rounded-t-3xl">
+                <h3 class="text-xl font-black text-gray-900 flex items-center gap-2"><i data-lucide="book-open" class="w-6 h-6 text-blue-600"></i> Guía de Ejercicios</h3>
+                <button onclick="ONS.UI.Help.close()" class="p-2 hover:bg-gray-200 rounded-full text-gray-500"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="p-0 overflow-y-auto bg-gray-50">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-blue-900 text-white uppercase text-xs font-bold sticky top-0 z-10">
+                            <tr>
+                                <th class="p-4">Ejercicio</th>
+                                <th class="p-4 hidden md:table-cell">Grupo</th>
+                                <th class="p-4 hidden md:table-cell">Equipo</th>
+                                <th class="p-4">Ejecución</th>
+                            </tr>
+                        </thead>
+                        <tbody id="help-table-body" class="divide-y divide-gray-200 bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-edit-log" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-[60] backdrop-blur-sm px-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
             <h3 class="text-lg font-bold mb-4 text-gray-900">Editar Registro</h3>
@@ -359,36 +409,43 @@
                 getDaysInMonth(m, y) { return new Date(y, m, 0).getDate(); }
             },
             
+            // CATALOGO ACTUALIZADO V3.0
             Catalog: [
-                { id: "leg_sq_gob", name: "Goblet Squat", group: "PIERNAS", equip: "Pesa Rusa", img: "Sentadillas.png", notes: "Peso al pecho, bajar profundo." },
-                { id: "leg_dl_rom", name: "Peso Muerto Rumano", group: "PIERNAS", equip: "Mancuernas", img: "Peso Muerto.png", notes: "Piernas semirrígidas." },
-                { id: "leg_lng", name: "Zancadas", group: "PIERNAS", equip: "Mancuernas", img: "Zancadas.png", notes: "Torso recto." },
-                { id: "leg_sq_bul", name: "Sentadilla Búlgara", group: "PIERNAS", equip: "Banco", img: "Sentadilla Bulgara.png", notes: "Pie apoyado atrás." },
-                { id: "push_bp_flat", name: "Press Banca Plano", group: "PECHO", equip: "Banco", img: "Press Banca.png", notes: "Bajar más que con barra." },
-                { id: "push_bp_inc", name: "Press Banca Inclinado", group: "PECHO", equip: "Banco", img: "Press Banca Inclinado.png", notes: "Inclinación suave." },
-                { id: "push_fly", name: "Aperturas", group: "PECHO", equip: "Banco", img: "Aperturas.png", notes: "Movimiento de abrazo." },
-                { id: "push_trx", name: "Chest Press TRX", group: "PECHO", equip: "TRX", img: "Chest Press TRX.png", notes: "Cuerpo en bloque." },
-                { id: "pull_lat", name: "Jalón al Pecho", group: "DORSAL", equip: "Máquina", img: "Jalon al Pecho.png", notes: "A la clavícula." },
-                { id: "pull_row_cab", name: "Remo en Polea", group: "DORSAL", equip: "Máquina", img: "Remo en Polea.png", notes: "Columna erguida." },
-                { id: "pull_row_db", name: "Remo a una mano", group: "DORSAL", equip: "Banco", img: "Remo a Una Mano.png", notes: "Hacia la cadera." },
-                { id: "pull_row_trx", name: "Remo Invertido", group: "DORSAL", equip: "TRX", img: "Remo Invertido TRX.png", notes: "Pecho a anillas." },
-                { id: "sh_press", name: "Press Militar", group: "HOMBROS", equip: "Mancuernas", img: "Press Militar.png", notes: "Vertical, core activo." },
-                { id: "sh_lat", name: "Elevaciones Laterales", group: "HOMBROS", equip: "Mancuernas", img: "Elevaciones Laterales.png", notes: "Hasta altura hombros." },
-                { id: "sh_front", name: "Elevaciones Anteriores", group: "HOMBROS", equip: "Mancuernas", img: "Elevaciones Anteriores.png", notes: "Hasta altura hombros." },
-                { id: "sh_yt", name: "Aperturas Y/T", group: "HOMBROS", equip: "TRX", img: "Aperturas en Y.png", notes: "Tensión constante." },
-                { id: "arm_curl", name: "Curl Bíceps", group: "BÍCEPS", equip: "Mancuernas", img: "Curl de Biceps.png", notes: "Sin balanceo." },
-                { id: "arm_ham", name: "Curl Martillo", group: "BÍCEPS", equip: "Mancuernas", img: "Curl Martillo.png", notes: "Palmas enfrentadas." },
-                { id: "arm_cbl", name: "Curl Polea", group: "BÍCEPS", equip: "Polea", img: "Curl de Biceps en Polea.png", notes: "Codos pegados." },
-                { id: "arm_trx", name: "Curl TRX", group: "BÍCEPS", equip: "TRX", img: "Curl de Biceps en TRX.png", notes: "Codos altos." },
-                { id: "tri_pd", name: "Jalón Tríceps", group: "TRÍCEPS", equip: "Polea", img: "Jalon de Triceps en Polea.png", notes: "Codos pegados." },
-                { id: "tri_oh", name: "Jalón tras nuca", group: "TRÍCEPS", equip: "Polea", img: "Jalon por Encima de la Cabeza.png", notes: "Espalda a máquina." },
-                { id: "tri_dips", name: "Fondos (Dips)", group: "TRÍCEPS", equip: "Banco", img: "Frondos en Banco.png", notes: "Bajar glúteo cerca." },
-                { id: "tri_cup", name: "Extensión Copa", group: "TRÍCEPS", equip: "Mancuerna", img: "Extensión Triceps Copa.png", notes: "Codos cerrados." },
-                { id: "tri_trx", name: "Extensión TRX", group: "TRÍCEPS", equip: "TRX", img: "Extension Triceps TRX.png", notes: "Manos a frente." },
-                { id: "core_plk", name: "Plancha", group: "CORE", equip: "Suelo", img: "Plancha.png", notes: "Línea recta." },
-                { id: "core_plk_trx", name: "Plancha TRX", group: "CORE", equip: "TRX", img: "Plancha en TRX.png", notes: "Pies colgados." },
-                { id: "core_rus", name: "Russian Twist", group: "CORE", equip: "Pesa Rusa", img: "Giros Rusos.png", notes: "Giro de torso." },
-                { id: "core_farm", name: "Paseo Granjero", group: "CORE", equip: "Pesas", img: "Paso de Granjero.png", notes: "Caminar estable." }
+                { id: "leg_sq_gob", name: "Goblet Squat (Sentadilla Copa)", group: "PIERNAS", equip: "Pesa Rusa o Mancuerna", img: "Sentadillas.png", notes: "Sujeta el peso pegado al pecho. Baja profundo." },
+                { id: "leg_dl_rom", name: "Peso Muerto Rumano", group: "PIERNAS", equip: "Mancuernas o Pesa Rusa", img: "Peso Muerto.png", notes: "Piernas semirrígidas. Baja el peso rozando las piernas hasta la espinilla." },
+                { id: "leg_lng", name: "Zancadas (Lunges)", group: "PIERNAS", equip: "Mancuernas", img: "Zancadas.png", notes: "Puedes hacerlas estáticas o caminando. Mantén el torso recto." },
+                { id: "leg_sq_bul", name: "Sentadilla Búlgara", group: "PIERNAS", equip: "Banco + Mancuernas", img: "Sentadilla Bulgara.png", notes: "Un pie apoyado atrás en el banco. Ejercicio exigente pero muy efectivo." },
+                
+                { id: "push_bp_flat", name: "Press de Banca Plano", group: "PECHO", equip: "Banco + Mancuernas", img: "Press Banca.png", notes: "Al usar mancuernas, baja más que con barra para estirar el pectoral." },
+                { id: "push_bp_inc", name: "Press de Banca Inclinado", group: "PECHO", equip: "Banco + Mancuernas", img: "Press Banca Inclinado.png", notes: "Al usar mancuernas, baja más que con barra para estirar el pectoral." },
+                { id: "push_fly", name: "Aperturas (Flyes)", group: "PECHO", equip: "Banco + Mancuernas", img: "Aperturas.png", notes: "Codos ligeramente flexionados, movimiento de \"abrazo\"." },
+                { id: "push_trx", name: "Chest Press (Flexiones)", group: "PECHO", equip: "TRX", img: "Chest Press TRX.png", notes: "Cuanto más vertical estés, más fácil. Cuanto más horizontal, más difícil." },
+
+                { id: "pull_lat", name: "Jalón al Pecho", group: "DORSAL", equip: "Máquina de Jalón", img: "Jalon al Pecho.png", notes: "Inclina el torso un poco atrás. Lleva la barra a la clavícula, no tras nuca." },
+                { id: "pull_row_cab", name: "Remo en Polea", group: "DORSAL", equip: "Máquina de Jalón", img: "Remo en Polea.png", notes: "Mantén la columna erquida durante el ejercico. No te inclines." },
+                { id: "pull_row_db", name: "Remo a una mano", group: "DORSAL", equip: "Banco + Mancuerna", img: "Remo a Una Mano.png", notes: "Apoya rodilla y mano en banco. Tira del peso hacia el bolsillo (cadera)." },
+                { id: "pull_row_trx", name: "Remo Invertido", group: "DORSAL", equip: "TRX", img: "Remo Invertido TRX.png", notes: "Cuerpo recto como una tabla. Tira hasta que el pecho toque las anillas." },
+
+                { id: "sh_press", name: "Press Militar", group: "HOMBROS", equip: "Mancuernas", img: "Press Militar.png", notes: "Empuja verticalmente. Si lo haces de pie, activas más el core." },
+                { id: "sh_lat", name: "Elevaciones Laterales", group: "HOMBROS", equip: "Mancuernas", img: "Elevaciones Laterales.png", notes: "Sube solo hasta la altura de los hombros. Codos un poco flexionados." },
+                { id: "sh_front", name: "Elevaciones Anteriores", group: "HOMBROS", equip: "Mancuernas", img: "Elevaciones Anteriores.png", notes: "Sube solo hasta la altura de los hombros. Codos un poco flexionados." },
+                { id: "sh_yt", name: "Aperturas en Y o T", group: "HOMBROS", equip: "TRX", img: "Aperturas en Y.png", notes: "Mantén la tensión en las cuerdas todo el tiempo. Excelente para salud del hombro." },
+
+                { id: "arm_curl", name: "Curl de Bíceps", group: "BÍCEPS", equip: "Mancuernas", img: "Curl de Biceps.png", notes: "Evita balancear el cuerpo. Solo se mueve el antebrazo." },
+                { id: "arm_ham", name: "Curl Martillo", group: "BÍCEPS", equip: "Mancuernas", img: "Curl Martillo.png", notes: "Palmas mirándose entre sí. Trabaja bíceps y antebrazo." },
+                { id: "arm_cbl", name: "Curl de Bíceps en Polea", group: "BÍCEPS", equip: "Máquina de Jalón", img: "Curl de Biceps en Polea.png", notes: "Usa la barra o cuerda del jalón. Codos pegados a las costillas." },
+                { id: "arm_trx", name: "Curl de Bíceps en suspensión", group: "BÍCEPS", equip: "TRX", img: "Curl de Biceps en TRX.png", notes: "Codos altos y fijos frente a ti. Lleva las manos a la frente." },
+
+                { id: "tri_pd", name: "Jalón de Tríceps (Pushdown)", group: "TRÍCEPS", equip: "Máquina de Jalón", img: "Jalon de Triceps en Polea.png", notes: "Usa la barra o cuerda del jalón. Codos pegados a las costillas." },
+                { id: "tri_oh", name: "Jalón tras nuca Polea", group: "TRÍCEPS", equip: "Polea Alta + Cuerda", img: "Jalon por Encima de la Cabeza.png", notes: "De espaldas a la máquina. Da un paso adelante para estabilidad." },
+                { id: "tri_dips", name: "Fondos en Banco (Dips)", group: "TRÍCEPS", equip: "Banco", img: "Frondos en Banco.png", notes: "Manos en el borde del banco, pies en el suelo. Baja el glúteo cerca del banco." },
+                { id: "tri_cup", name: "Extensión Copa", group: "TRÍCEPS", equip: "1 Mancuerna pesada", img: "Extensión Triceps Copa.png", notes: "Mantén los codos apuntando hacia arriba y cerrados cerca de la cabeza." },
+                { id: "tri_trx", name: "Extensión de Tríceps TRX", group: "TRÍCEPS", equip: "TRX", img: "Extension Triceps TRX.png", notes: "Cuerpo rígido. Flexiona codos llevando las manos a tu frente." },
+
+                { id: "core_plk", name: "Plancha", group: "CORE", equip: "Suelo", img: "Plancha.png", notes: "Apoya antebrazos y puntas de los pies. Mantén el cuerpo alineado (como una tabla) desde la cabeza a los talones, contrayendo abdomen y glúteos para no arquear la zona lumbar." },
+                { id: "core_plk_trx", name: "Plancha con pies en estribos", group: "CORE", equip: "TRX", img: "Plancha en TRX.png", notes: "Al tener los pies colgados, la inestabilidad obliga al abdomen a trabajar doble." },
+                { id: "core_rus", name: "Russian Twist (Giros)", group: "CORE", equip: "Pesa Rusa", img: "Giros Rusos.png", notes: "Sentado en suelo, gira el torso llevando la pesa de lado a lado." },
+                { id: "core_farm", name: "Paseo de Granjero", group: "CORE", equip: "Pesas Rusas", img: "Paso de Granjero.png", notes: "Camina con una pesa en cada mano (o solo una) sin inclinarte." }
             ],
             
             DataStore: {
@@ -512,6 +569,35 @@
                     } catch(e) { console.error(`Nav Error (${id}):`, e); }
                 },
                 formatDate(iso) { if(!iso) return ''; const d = new Date(iso); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear().toString().substr(-2)}`; },
+                
+                Help: {
+                    open() {
+                        const tb = document.getElementById('help-table-body');
+                        tb.innerHTML = '';
+                        ONS.Catalog.forEach(ex => {
+                            tb.innerHTML += `
+                            <tr class="border-b hover:bg-gray-50 align-top">
+                                <td class="p-4 flex flex-col gap-2 items-start">
+                                    <div class="font-bold text-gray-900 text-sm mb-1">${ex.name}</div>
+                                    <div class="w-16 h-16 bg-white border border-gray-200 rounded-lg p-1 flex-shrink-0">
+                                        <img src="${ex.img}" class="w-full h-full object-contain" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTJlOGYwIiBzdHJva2Utd2lkdGg9IjIiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIi8+PGNpcmNsZSBjeD0iOC41IiBjeT0iOC41IiByPSIxLjUiLz48cG9seWxpbmUgcG9pbnRzPSIyMSAxNSAxNiAxMCA1IDIxIi8+PC9zdmc+'">
+                                    </div>
+                                </td>
+                                <td class="p-4 text-xs font-bold text-gray-500 hidden md:table-cell">${ex.group}</td>
+                                <td class="p-4 text-xs text-gray-600 hidden md:table-cell">${ex.equip}</td>
+                                <td class="p-4 text-sm text-gray-700">
+                                    <div class="md:hidden text-[10px] font-bold text-gray-400 uppercase mb-1">${ex.group} • ${ex.equip}</div>
+                                    ${ex.notes}
+                                </td>
+                            </tr>`;
+                        });
+                        document.getElementById('modal-help').classList.remove('hidden');
+                    },
+                    close() {
+                        document.getElementById('modal-help').classList.add('hidden');
+                    }
+                },
+
                 Home: {
                     populateSelector() { const sel = document.getElementById('exercise-select'); sel.innerHTML = '<option value="">Selecciona Ejercicio...</option>'; [...new Set(ONS.Catalog.map(i=>i.group))].forEach(g => { const grp = document.createElement('optgroup'); grp.label = g; ONS.Catalog.filter(i=>i.group===g).forEach(ex => { const op = document.createElement('option'); op.value = ex.id; op.textContent = ex.name; grp.appendChild(op); }); sel.appendChild(grp); }); },
                     initAdmin() {
@@ -520,9 +606,12 @@
                         wrapper.classList.remove('hidden');
                         sel.innerHTML = '';
                         const myself = document.createElement('option'); myself.value = ONS.Auth.user.userId; myself.textContent = "Mí mismo"; sel.appendChild(myself);
-                        ONS.DataStore.listUsers().filter(u => u.status === 'ACTIVE' && u.userId !== ONS.Auth.user.userId).forEach(u => {
-                            const op = document.createElement('option'); op.value = u.userId; op.textContent = `${u.firstName} ${u.lastName}`; sel.appendChild(op);
-                        });
+                        // ORDENADO POR NOMBRE
+                        ONS.DataStore.listUsers().filter(u => u.status === 'ACTIVE' && u.userId !== ONS.Auth.user.userId)
+                            .sort((a,b) => a.firstName.localeCompare(b.firstName))
+                            .forEach(u => {
+                                const op = document.createElement('option'); op.value = u.userId; op.textContent = `${u.firstName} ${u.lastName}`; sel.appendChild(op);
+                            });
                     },
                     updatePreview() {
                         const id = document.getElementById('exercise-select').value, card = document.getElementById('exercise-preview-card'), grid = document.getElementById('series-container');
@@ -532,10 +621,9 @@
                         document.getElementById('preview-name').textContent = ex.name; 
                         document.getElementById('preview-notes').textContent = ex.notes; 
                         
-                        // CORRECCIÓN IMAGEN: Asegurar que se ve
                         const imgEl = document.getElementById('preview-img');
                         imgEl.src = ex.img;
-                        imgEl.style.display = 'block'; // Forzar display
+                        imgEl.style.display = 'block'; 
 
                         card.classList.remove('hidden'); 
                         grid.classList.remove('hidden'); 
@@ -595,20 +683,23 @@
                 Members: {
                     render() {
                         const tb = document.getElementById('members-table-body'); tb.innerHTML = '';
-                        ONS.DataStore.listUsers().filter(u=>u.status!=='DESACTIVATED').forEach(u => {
-                            tb.innerHTML += `
-                            <tr class="hover:bg-gray-50 border-b last:border-0 md:border-b-0">
-                                <td class="p-4 font-mono" data-label="Chalet">${u.chalet}</td>
-                                <td class="p-4 font-bold text-gray-700" data-label="Nombre">${u.firstName} ${u.lastName} ${u.role==='ADMIN'?'<span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded ml-1 uppercase">Admin</span>':''}</td>
-                                <td class="p-4 text-xs text-gray-500" data-label="Usuario">${u.username}</td>
-                                <td class="p-4 text-center" data-label="Acciones">
-                                    <div class="flex gap-4 justify-end md:justify-center w-full">
-                                        <button onclick="ONS.UI.Members.openModal('${u.userId}')" class="text-blue-600 hover:text-blue-800"><i data-lucide="edit-2" class="w-5 h-5"></i></button>
-                                        ${u.userId !== ONS.Auth.user.userId ? `<button onclick="ONS.UI.Members.delete('${u.userId}')" class="text-red-400 hover:text-red-600"><i data-lucide="trash-2" class="w-5 h-5"></i></button>` : ''}
-                                    </div>
-                                </td>
-                            </tr>`;
-                        });
+                        // ORDENADO POR NOMBRE
+                        ONS.DataStore.listUsers().filter(u=>u.status!=='DESACTIVATED')
+                            .sort((a,b) => a.firstName.localeCompare(b.firstName))
+                            .forEach(u => {
+                                tb.innerHTML += `
+                                <tr class="hover:bg-gray-50 border-b last:border-0 md:border-b-0">
+                                    <td class="p-4 font-mono" data-label="Chalet">${u.chalet}</td>
+                                    <td class="p-4 font-bold text-gray-700" data-label="Nombre">${u.firstName} ${u.lastName} ${u.role==='ADMIN'?'<span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded ml-1 uppercase">Admin</span>':''}</td>
+                                    <td class="p-4 text-xs text-gray-500" data-label="Usuario">${u.username}</td>
+                                    <td class="p-4 text-center" data-label="Acciones">
+                                        <div class="flex gap-4 justify-end md:justify-center w-full">
+                                            <button onclick="ONS.UI.Members.openModal('${u.userId}')" class="text-blue-600 hover:text-blue-800"><i data-lucide="edit-2" class="w-5 h-5"></i></button>
+                                            ${u.userId !== ONS.Auth.user.userId ? `<button onclick="ONS.UI.Members.delete('${u.userId}')" class="text-red-400 hover:text-red-600"><i data-lucide="trash-2" class="w-5 h-5"></i></button>` : ''}
+                                        </div>
+                                    </td>
+                                </tr>`;
+                            });
                         lucide.createIcons();
                     },
                     openPublicRegister() { this.openModal(null, true); },
@@ -626,7 +717,6 @@
                         const p1 = document.getElementById('mem-pass').value;
                         const p2 = document.getElementById('mem-pass-confirm').value;
                         
-                        // Validar contraseñas
                         if(p1 && p1 !== p2) return alert("Las contraseñas no coinciden.");
                         
                         const data = { userId: uid || null, firstName: document.getElementById('mem-name').value, lastName: document.getElementById('mem-lastname').value, chalet: document.getElementById('mem-chalet').value, email: document.getElementById('mem-email').value, password: p1, role: isAdmin ? 'ADMIN' : 'USER' };
@@ -642,40 +732,59 @@
                             const users = ONS.DataStore.listUsers();
                             const logs = ONS.DataStore.state.logs.filter(l => !l.deleted);
                             
+                            // STATS
                             document.getElementById('adm-stat-users').textContent = users.length;
                             document.getElementById('adm-stat-logs').textContent = logs.length;
-                            
-                            const activeThreshold = new Date(); 
-                            activeThreshold.setDate(activeThreshold.getDate() - 30);
-                            
-                            const activeUsers = users.filter(u => 
-                                logs.some(l => l.userId === u.userId && l.date && new Date(l.date) > activeThreshold)
-                            ).length;
-                            
+                            const activeThreshold = new Date(); activeThreshold.setDate(activeThreshold.getDate() - 30);
+                            const activeUsers = users.filter(u => logs.some(l => l.userId === u.userId && l.date && new Date(l.date) > activeThreshold)).length;
                             document.getElementById('adm-stat-active').textContent = activeUsers;
                             
                             const today = new Date();
                             const currMonthKey = ONS.Utils.fmtMonth(today);
                             
+                            // CALCULOS VOLUMEN (LOGS)
                             const monMap = {};
+                            const dayMap = {};
                             logs.forEach(l => { 
                                 if(!l.date) return;
                                 const k = l.date.substring(0,7); 
                                 if(k !== currMonthKey) monMap[k] = (monMap[k]||0)+1; 
+                                if(l.date.startsWith(currMonthKey)) dayMap[l.date] = (dayMap[l.date]||0)+1;
                             });
                             
+                            // CALCULOS ASISTENCIA (SESIONES UNICAS)
+                            const attendMonth = {}; // Key: Month, Value: Set of User|Date
+                            const attendDay = {}; // Key: Date, Value: Set of User
+                            logs.forEach(l => {
+                                if(!l.date) return;
+                                const mKey = l.date.substring(0,7);
+                                const sessionKey = `${l.userId}|${l.date}`;
+                                
+                                // History Month
+                                if (mKey !== currMonthKey) {
+                                    if(!attendMonth[mKey]) attendMonth[mKey] = new Set();
+                                    attendMonth[mKey].add(sessionKey);
+                                }
+                                
+                                // Current Month Day
+                                if(l.date.startsWith(currMonthKey)) {
+                                    if(!attendDay[l.date]) attendDay[l.date] = new Set();
+                                    attendDay[l.date].add(l.userId);
+                                }
+                            });
+
                             const monKeys = Object.keys(monMap).sort();
-                            const dayMap = {};
-                            
-                            logs.forEach(l => { 
-                                if(l.date && l.date.startsWith(currMonthKey)) dayMap[l.date] = (dayMap[l.date]||0)+1; 
-                            });
-                            
+                            const histKeys = Object.keys(attendMonth).sort();
                             const daysInMonth = ONS.Utils.getDaysInMonth(today.getMonth()+1, today.getFullYear());
                             const dayKeys = Array.from({length: daysInMonth}, (_, i) => `${currMonthKey}-${String(i+1).padStart(2,'0')}`);
                             
-                            this.drawChart('admChartMonth', 'bar', monKeys, monKeys.map(k=>monMap[k]), 'Actividad Mensual');
-                            this.drawChart('admChartDay', 'line', dayKeys.map(k=>k.slice(-2)), dayKeys.map(k=>dayMap[k]||0), 'Actividad Diaria');
+                            // RENDER CHARTS
+                            this.drawChart('admChartMonth', 'bar', monKeys, monKeys.map(k=>monMap[k]), 'Registros Totales');
+                            this.drawChart('admChartDay', 'line', dayKeys.map(k=>k.slice(-2)), dayKeys.map(k=>dayMap[k]||0), 'Registros Diarios');
+                            
+                            this.drawChart('admChartAttendMonth', 'bar', histKeys, histKeys.map(k=>attendMonth[k].size), 'Sesiones Totales');
+                            this.drawChart('admChartAttendDay', 'line', dayKeys.map(k=>k.slice(-2)), dayKeys.map(k=>attendDay[k]?attendDay[k].size:0), 'Usuarios Distintos');
+
                         } catch(e) { console.error("Admin Render Error:", e); }
                     },
                     drawChart(id, type, labels, data, label) {
@@ -727,12 +836,29 @@
                         
                         const tbEx = document.getElementById('report-table-exercise'); tbEx.innerHTML = '';
                         exLogs.forEach(l => { 
+                            const ex = ONS.Catalog.find(c => c.id === l.exerciseId) || {img:''};
                             let seriesCells = ''; for(let i=0;i<4;i++) { seriesCells += `<td class="p-3 text-gray-600" data-label="Serie ${i+1}">${l.series[i] ? `${l.series[i].w}x${l.series[i].r}` : '-'}</td>`; } 
-                            tbEx.innerHTML += `<tr class="border-b last:border-0 md:border-b hover:bg-gray-50"><td class="p-3 font-medium text-blue-900" data-label="Fecha">${ONS.UI.formatDate(l.date)}</td>${seriesCells}<td class="p-3 text-right" data-label="Acciones"><div class="flex justify-end gap-2"><button onclick="ONS.UI.Reports.editLog('${l.logId}')" class="text-blue-600 hover:text-blue-800 bg-blue-50 p-2 rounded-lg"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="ONS.UI.Reports.deleteLog('${l.logId}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded-lg ml-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`; 
+                            tbEx.innerHTML += `
+                            <tr class="border-b last:border-0 md:border-b hover:bg-gray-50">
+                                <td class="p-3 font-medium text-blue-900 flex items-center gap-2" data-label="Fecha">
+                                    <img src="${ex.img}" class="w-6 h-6 object-contain hidden md:block">
+                                    ${ONS.UI.formatDate(l.date)}
+                                </td>
+                                ${seriesCells}
+                                <td class="p-3 text-right" data-label="Acciones">
+                                    <div class="flex justify-end gap-2">
+                                        <button onclick="ONS.UI.Reports.editLog('${l.logId}')" class="text-blue-600 hover:text-blue-800 bg-blue-50 p-2 rounded-lg"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button onclick="ONS.UI.Reports.deleteLog('${l.logId}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded-lg ml-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>`; 
                         });
                         
                         const tbAll = document.getElementById('report-table-all'); tbAll.innerHTML = '';
-                        logs.forEach(l => { const summary = l.series.map(s => `${s.w}x${s.r}`).join(', '); tbAll.innerHTML += `<tr class="border-b last:border-0 md:border-b hover:bg-gray-50"><td class="p-3" data-label="Fecha">${ONS.UI.formatDate(l.date)}</td><td class="p-3 font-bold text-xs text-blue-900 uppercase" data-label="Ejercicio">${l.exerciseName}</td><td class="p-3 text-gray-500 font-mono text-xs" data-label="Series">${summary}</td><td class="p-3 text-right" data-label="Acciones"><div class="flex justify-end gap-2"><button onclick="ONS.UI.Reports.editLog('${l.logId}')" class="text-blue-600 bg-blue-50 p-2 rounded-lg"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="ONS.UI.Reports.deleteLog('${l.logId}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded-lg ml-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`; });
+                        logs.forEach(l => { 
+                            const summary = l.series.map(s => `${s.w}x${s.r}`).join(', '); 
+                            tbAll.innerHTML += `<tr class="border-b last:border-0 md:border-b hover:bg-gray-50"><td class="p-3" data-label="Fecha">${ONS.UI.formatDate(l.date)}</td><td class="p-3 font-bold text-xs text-blue-900 uppercase" data-label="Ejercicio">${l.exerciseName}</td><td class="p-3 text-gray-500 font-mono text-xs" data-label="Series">${summary}</td><td class="p-3 text-right" data-label="Acciones"><div class="flex justify-end gap-2"><button onclick="ONS.UI.Reports.editLog('${l.logId}')" class="text-blue-600 bg-blue-50 p-2 rounded-lg"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="ONS.UI.Reports.deleteLog('${l.logId}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded-lg ml-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`; 
+                        });
                         lucide.createIcons();
                     },
                     drawChart(id, type, labels, data, label) {
