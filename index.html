@@ -366,12 +366,12 @@
     </div>
 
     <div id="modal-help" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-[70] backdrop-blur-sm px-4 py-6">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[80dvh]">
-            <div class="p-5 flex justify-between items-center border-b flex-shrink-0 bg-gray-50 rounded-t-3xl">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[85dvh] overflow-hidden">
+            <div class="p-5 flex justify-between items-center border-b flex-shrink-0 bg-gray-50">
                 <h3 class="text-xl font-black text-gray-900 flex items-center gap-2"><i data-lucide="book-open" class="w-6 h-6 text-blue-600"></i> Guía de Ejercicios</h3>
                 <button onclick="ONS.UI.Help.close()" class="p-2 hover:bg-gray-200 rounded-full text-gray-500"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
-            <div class="p-0 overflow-y-auto bg-gray-50">
+            <div class="p-0 overflow-y-auto bg-white">
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
                         <thead class="bg-blue-900 text-white uppercase text-xs font-bold sticky top-0 z-10">
@@ -385,11 +385,6 @@
                         <tbody id="help-table-body" class="divide-y divide-gray-200 bg-white"></tbody>
                     </table>
                 </div>
-            </div>
-            <div class="p-4 pb-safe border-t border-gray-100 flex-shrink-0 bg-white rounded-b-3xl">
-                <button onclick="ONS.UI.Help.close()" class="w-full bg-blue-900 text-white font-bold py-3 rounded-xl shadow-lg active:scale-[0.98] transition-transform text-lg flex justify-center items-center gap-2">
-                    <i data-lucide="x-circle" class="w-5 h-5"></i> Cerrar Ayuda
-                </button>
             </div>
         </div>
     </div>
@@ -860,6 +855,7 @@
                         
                         const tbEx = document.getElementById('report-table-exercise'); tbEx.innerHTML = '';
                         exLogs.forEach(l => { 
+                            // Mostrar imagen pequeña en la tabla también
                             const ex = ONS.Catalog.find(c => c.id === l.exerciseId) || {img:''};
                             let seriesCells = ''; for(let i=0;i<4;i++) { seriesCells += `<td class="p-3 text-gray-600" data-label="Serie ${i+1}">${l.series[i] ? `${l.series[i].w}x${l.series[i].r}` : '-'}</td>`; } 
                             tbEx.innerHTML += `
