@@ -5,178 +5,317 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Team ONS v5.5</title>
+    <title>Team ONS</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* RESET TOTAL */
+        /* BASE & RESET */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; font-family: system-ui, -apple-system, sans-serif; background: #f2f2f7; }
+        html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #f2f2f7; font-family: -apple-system, system-ui, sans-serif; }
         
-        /* CAPAS */
+        /* CAPAS DE VISUALIZACIÓN */
         #layer-login { position: absolute; inset: 0; z-index: 50; background: #fff; display: flex; flex-direction: column; overflow-y: auto; }
         #layer-app { position: absolute; inset: 0; z-index: 10; display: none; flex-direction: column; background: #f2f2f7; }
         
-        /* SCROLL AREA */
-        #scroll-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 120px; padding-top: env(safe-area-inset-top); }
+        /* SCROLL APP */
+        #main-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 100px; padding-top: env(safe-area-inset-top); }
         
-        /* UTILS */
+        /* UTILIDADES UI */
         .hidden-force { display: none !important; }
-        input, select { font-size: 16px !important; border-radius: 12px; }
-        .ios-card { background: white; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .ios-card { background: white; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); overflow: hidden; }
+        input, select { font-size: 16px !important; border-radius: 10px; -webkit-appearance: none; }
         
-        /* NAVBAR */
-        .nav-item.active { color: #2563eb; font-weight: bold; }
-        .nav-item.active svg { stroke: #2563eb; }
+        /* MENÚ INFERIOR */
+        .nav-item { color: #9ca3af; transition: all 0.2s; }
+        .nav-item.active { color: #2563eb; font-weight: 600; }
+        .nav-item.active svg { stroke: #2563eb; fill: #dbeafe; }
+        
+        /* INPUTS GRID */
+        .input-group { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px; }
+        .input-label { font-size: 10px; font-weight: 700; color: #64748b; text-align: center; text-transform: uppercase; margin-bottom: 4px; }
+        
+        /* MODALES */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(2px); }
+        .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 24px 24px 0 0; padding: 24px; padding-bottom: 40px; animation: slideUp 0.3s ease-out; }
+        @media (min-width: 640px) { .modal-overlay { align-items: center; } .modal-content { border-radius: 24px; padding-bottom: 24px; } }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div id="layer-login">
         <div class="flex-1 flex flex-col items-center justify-center p-6">
-            <div class="text-center mb-8">
-                <div class="inline-flex p-4 bg-blue-100 rounded-full mb-4 text-blue-600"><i data-lucide="dumbbell" class="w-10 h-10"></i></div>
-                <h1 class="text-3xl font-black text-gray-900">Team ONS</h1>
-                <p class="text-sm font-bold text-green-600 bg-green-100 inline-block px-3 py-1 rounded-full mt-2">Versión 5.5 Activa</p>
+            <div class="text-center mb-10">
+                <div class="inline-flex p-4 bg-blue-600 rounded-2xl mb-4 text-white shadow-lg shadow-blue-200"><i data-lucide="dumbbell" class="w-10 h-10"></i></div>
+                <h1 class="text-3xl font-black text-gray-900 tracking-tight">Team ONS</h1>
+                <p class="text-sm font-medium text-gray-500 mt-1">Versión 6.0 Producción</p>
             </div>
             
             <form onsubmit="ONS.Auth.login(event)" class="w-full max-w-sm space-y-4">
-                <input type="text" id="login-user" class="w-full h-14 border border-gray-300 bg-gray-50 rounded-xl px-4 text-lg font-bold" placeholder="Usuario" autocapitalize="none" required>
-                <input type="password" id="login-pass" class="w-full h-14 border border-gray-300 bg-gray-50 rounded-xl px-4 text-lg font-bold" placeholder="Contraseña" required>
-                <button type="submit" class="w-full h-14 bg-blue-600 text-white font-bold rounded-xl text-xl shadow-lg active:scale-95 transition">ENTRAR</button>
+                <div>
+                    <input type="text" id="login-user" class="w-full h-14 border border-gray-200 bg-gray-50 px-4 text-lg font-bold outline-none focus:border-blue-500 focus:bg-white transition" placeholder="Usuario (ej. LuisG_33)" autocapitalize="none" required>
+                </div>
+                <div>
+                    <input type="password" id="login-pass" class="w-full h-14 border border-gray-200 bg-gray-50 px-4 text-lg font-bold outline-none focus:border-blue-500 focus:bg-white transition" placeholder="Contraseña" required>
+                </div>
+                <button type="submit" class="w-full h-14 bg-blue-600 text-white font-bold rounded-xl text-lg shadow-lg active:scale-95 transition">INICIAR SESIÓN</button>
             </form>
 
-            <div class="mt-10 w-full max-w-sm border-t pt-6 text-center">
-                <p class="text-xs text-gray-400 mb-2">¿Problemas?</p>
-                <button onclick="localStorage.clear(); alert('Datos borrados. Recarga la página.'); location.reload();" class="text-red-500 font-bold text-xs border border-red-200 px-4 py-2 rounded-lg bg-red-50">⚠️ RESETEAR DATOS</button>
-            </div>
-            
-            <div class="mt-4">
-                <button onclick="ONS.UI.Members.openPublicRegister()" class="text-blue-600 font-bold">Crear cuenta</button>
+            <div class="mt-8 pt-8 border-t w-full max-w-sm text-center">
+                <button onclick="ONS.UI.Members.openReg()" class="text-blue-600 font-bold text-sm">¿Nuevo usuario? Regístrate</button>
             </div>
         </div>
     </div>
 
     <div id="layer-app">
-        <header class="h-16 bg-white border-b flex items-center justify-between px-4 pt-safe shrink-0 z-20">
-            <span class="font-black text-xl text-blue-900 tracking-tight">TEAM ONS</span>
+        
+        <header class="h-14 bg-white/90 backdrop-blur border-b flex items-center justify-between px-4 pt-safe shrink-0 z-20">
+            <span class="font-black text-xl text-blue-900 tracking-tight">Team ONS</span>
             <div class="flex items-center gap-3">
-                <span id="header-user" class="text-xs font-bold bg-gray-100 px-2 py-1 rounded">User</span>
-                <button onclick="location.reload()" class="p-2 bg-red-50 text-red-500 rounded-full"><i data-lucide="log-out" class="w-5 h-5"></i></button>
+                <span id="header-user" class="text-[10px] font-bold bg-blue-50 text-blue-800 px-2 py-1 rounded uppercase tracking-wider">User</span>
+                <button onclick="location.reload()" class="text-gray-400 hover:text-red-500"><i data-lucide="log-out" class="w-5 h-5"></i></button>
             </div>
         </header>
 
-        <div id="scroll-content">
-            <div class="p-4 max-w-lg mx-auto">
-                
+        <div id="main-scroll">
+            <div class="p-4 max-w-xl mx-auto">
+
                 <section id="view-home" class="view-section">
                     <div class="flex gap-2 mb-4">
-                        <input type="date" id="session-date" onchange="ONS.UI.Home.renderLogs()" class="flex-1 h-12 bg-white border-0 shadow-sm rounded-xl text-center font-bold">
-                        <div id="admin-sel-wrapper" class="hidden w-1/2 bg-yellow-100 rounded-xl">
-                            <select id="admin-sel" onchange="ONS.UI.Home.renderLogs()" class="w-full h-full bg-transparent border-0 text-center text-xs font-bold text-yellow-900"></select>
+                        <div class="flex-1 relative">
+                            <div class="absolute left-3 top-3.5 text-gray-400 pointer-events-none"><i data-lucide="calendar" class="w-4 h-4"></i></div>
+                            <input type="date" id="session-date" onchange="ONS.UI.Home.renderLogs()" class="w-full h-12 bg-white border border-gray-200 rounded-xl pl-10 text-center font-bold text-gray-800 shadow-sm">
+                        </div>
+                        <div id="home-admin-wrapper" class="hidden w-1/2 relative bg-yellow-50 border border-yellow-200 rounded-xl">
+                            <select id="home-member-select" onchange="ONS.UI.Home.renderLogs()" class="w-full h-full bg-transparent border-none text-center text-xs font-bold text-yellow-900 appearance-none px-2"></select>
+                            <div class="absolute right-2 top-4 text-yellow-600 pointer-events-none"><i data-lucide="chevron-down" class="w-3 h-3"></i></div>
                         </div>
                     </div>
 
                     <div class="ios-card p-4">
-                        <label class="text-xs font-bold text-gray-400 uppercase">Ejercicio</label>
-                        <select id="exercise-select" onchange="ONS.UI.Home.updatePreview()" class="w-full h-14 mt-1 bg-gray-50 border-gray-200 font-bold text-lg mb-4"></select>
-                        
-                        <div id="preview-card" class="hidden flex items-center gap-4 bg-blue-50 p-3 rounded-xl mb-4">
-                            <img id="preview-img" src="" class="w-10 h-10 object-contain" onerror="this.style.display='none'"> 
-                            <div><div id="preview-name" class="font-bold text-sm"></div><div id="preview-group" class="text-xs font-bold text-blue-500"></div></div>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Ejercicio</label>
+                        <div class="relative mb-4">
+                            <select id="exercise-select" onchange="ONS.UI.Home.updatePreview()" class="w-full h-14 bg-gray-50 border border-gray-200 px-4 font-bold text-lg text-gray-900 appearance-none rounded-xl outline-none focus:border-blue-500">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                            <div class="absolute right-4 top-5 text-gray-400 pointer-events-none"><i data-lucide="chevron-down" class="w-5 h-5"></i></div>
                         </div>
 
-                        <div id="input-grid" class="hidden">
+                        <div id="input-panel" class="hidden">
                             <div class="grid grid-cols-2 gap-3 mb-4">
-                                <div class="bg-gray-50 p-2 rounded-xl border"><div class="text-center text-xs font-bold text-gray-400">S1</div><div class="flex gap-1"><input type="number" id="s1w" placeholder="Kg" class="text-center font-bold"><input type="number" id="s1r" placeholder="Rps" class="text-center"></div></div>
-                                <div class="bg-gray-50 p-2 rounded-xl border"><div class="text-center text-xs font-bold text-gray-400">S2</div><div class="flex gap-1"><input type="number" id="s2w" placeholder="Kg" class="text-center font-bold"><input type="number" id="s2r" placeholder="Rps" class="text-center"></div></div>
-                                <div class="bg-gray-50 p-2 rounded-xl border"><div class="text-center text-xs font-bold text-gray-400">S3</div><div class="flex gap-1"><input type="number" id="s3w" placeholder="Kg" class="text-center font-bold"><input type="number" id="s3r" placeholder="Rps" class="text-center"></div></div>
-                                <div class="bg-gray-50 p-2 rounded-xl border"><div class="text-center text-xs font-bold text-gray-400">S4</div><div class="flex gap-1"><input type="number" id="s4w" placeholder="Kg" class="text-center font-bold"><input type="number" id="s4r" placeholder="Rps" class="text-center"></div></div>
+                                <div class="input-group">
+                                    <div class="input-label">Serie 1</div>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="s1w" placeholder="Kg" class="w-full h-10 text-center font-bold bg-white border border-gray-200">
+                                        <input type="number" id="s1r" placeholder="Rps" class="w-full h-10 text-center bg-white border border-gray-200 text-gray-600">
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-label">Serie 2</div>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="s2w" placeholder="Kg" class="w-full h-10 text-center font-bold bg-white border border-gray-200">
+                                        <input type="number" id="s2r" placeholder="Rps" class="w-full h-10 text-center bg-white border border-gray-200 text-gray-600">
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-label">Serie 3</div>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="s3w" placeholder="Kg" class="w-full h-10 text-center font-bold bg-white border border-gray-200">
+                                        <input type="number" id="s3r" placeholder="Rps" class="w-full h-10 text-center bg-white border border-gray-200 text-gray-600">
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-label">Serie 4</div>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="s4w" placeholder="Kg" class="w-full h-10 text-center font-bold bg-white border border-gray-200">
+                                        <input type="number" id="s4r" placeholder="Rps" class="w-full h-10 text-center bg-white border border-gray-200 text-gray-600">
+                                    </div>
+                                </div>
                             </div>
-                            <button onclick="ONS.UI.Home.save()" class="w-full h-14 bg-blue-600 text-white font-bold rounded-xl shadow-lg active:scale-95 text-lg">GUARDAR DATOS</button>
+                            <button onclick="ONS.UI.Home.save()" class="w-full h-12 bg-blue-600 text-white font-bold rounded-xl shadow-md active:scale-95 transition flex items-center justify-center gap-2">
+                                <i data-lucide="check" class="w-5 h-5"></i> GUARDAR DATOS
+                            </button>
                         </div>
                     </div>
 
-                    <div class="flex justify-between px-2 mb-2"><span class="font-bold text-gray-400 text-sm uppercase">Registros Hoy</span><span id="today-count" class="font-bold bg-gray-200 px-2 rounded">0</span></div>
-                    <div id="logs-list" class="space-y-3"></div>
+                    <div class="flex justify-between px-2 mb-2 items-center">
+                        <span class="font-bold text-gray-400 text-xs uppercase tracking-wide">Historial Hoy</span>
+                        <span id="today-count" class="font-bold text-xs bg-gray-200 px-2 py-0.5 rounded text-gray-600">0</span>
+                    </div>
+                    <div id="logs-list" class="space-y-3 pb-safe"></div>
                 </section>
 
-                <section id="view-reports" class="hidden">
-                    <h2 class="text-2xl font-bold mb-4">Progreso</h2>
-                    <div class="ios-card p-4 space-y-3">
-                        <div id="rep-adm-wrap" class="hidden"><label class="text-xs font-bold text-gray-400">USUARIO</label><select id="rep-adm-sel" onchange="ONS.UI.Reports.update()" class="w-full h-10 bg-blue-50 text-blue-900 font-bold mb-2"></select></div>
-                        <div class="flex gap-2">
-                            <div class="w-2/3"><label class="text-xs font-bold text-gray-400">EJERCICIO</label><select id="rep-ex-sel" onchange="ONS.UI.Reports.update()" class="h-10 text-sm"></select></div>
-                            <div class="w-1/3"><label class="text-xs font-bold text-gray-400">DATO</label><select id="rep-met-sel" onchange="ONS.UI.Reports.update()" class="h-10 text-sm"><option value="max">1RM</option><option value="vol">Vol</option></select></div>
+                <section id="view-reports" class="view-section hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4 px-1">Informes y Progreso</h2>
+                    
+                    <div class="ios-card p-4 space-y-4">
+                        <div id="rep-adm-wrap" class="hidden">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase">Ver usuario:</label>
+                            <select id="rep-adm-sel" onchange="ONS.UI.Reports.update()" class="w-full h-10 bg-blue-50 border-none text-blue-900 font-bold text-sm"></select>
                         </div>
-                        <div class="h-48 relative"><canvas id="chart-cv"></canvas></div>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                                <div class="text-[10px] text-blue-400 font-bold uppercase">Días Entrenados</div>
+                                <div id="rep-stat-days" class="text-2xl font-bold text-blue-900">0</div>
+                            </div>
+                            <div class="bg-purple-50 p-3 rounded-xl border border-purple-100">
+                                <div class="text-[10px] text-purple-400 font-bold uppercase">Ejercicios Total</div>
+                                <div id="rep-stat-total" class="text-2xl font-bold text-purple-900">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ios-card p-4">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase mb-3">Constancia (Días/Mes)</h3>
+                        <div class="h-40 w-full relative"><canvas id="chart-attend"></canvas></div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-gray-900 mb-3 px-1 mt-6">Análisis por Ejercicio</h3>
+                    <div class="ios-card p-4 space-y-3">
+                        <div class="flex gap-2">
+                            <div class="w-2/3">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase">Ejercicio</label>
+                                <select id="rep-ex-sel" onchange="ONS.UI.Reports.update()" class="w-full h-10 bg-gray-50 border border-gray-200 text-sm font-bold"></select>
+                            </div>
+                            <div class="w-1/3">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase">Métrica</label>
+                                <select id="rep-met-sel" onchange="ONS.UI.Reports.update()" class="w-full h-10 bg-gray-50 border border-gray-200 text-sm font-bold">
+                                    <option value="max">1RM</option>
+                                    <option value="vol">Volumen</option>
+                                    <option value="ton">Kilos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="h-48 w-full relative"><canvas id="chart-evo"></canvas></div>
+                    </div>
+
+                    <div class="ios-card overflow-hidden">
+                        <div class="bg-gray-50 px-4 py-2 border-b text-[10px] font-bold text-gray-400 uppercase">Histórico Detallado</div>
+                        <div class="max-h-60 overflow-y-auto">
+                            <table class="w-full text-xs text-left">
+                                <thead class="bg-white sticky top-0 shadow-sm text-gray-500"><tr><th class="p-3">Fecha</th><th class="p-3">Series (Kg x Reps)</th><th class="p-3 text-right">#</th></tr></thead>
+                                <tbody id="rep-table" class="divide-y divide-gray-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="view-members" class="view-section hidden">
+                    <div class="flex justify-between items-center mb-4 px-1">
+                        <h2 class="text-2xl font-bold text-gray-900">Miembros</h2>
+                        <button onclick="ONS.UI.Members.modal()" class="w-10 h-10 bg-green-500 text-white rounded-full font-bold shadow flex items-center justify-center active:scale-90 transition"><i data-lucide="plus" class="w-5 h-5"></i></button>
                     </div>
                     <div class="ios-card overflow-hidden">
-                        <table class="w-full text-xs"><tbody id="rep-table" class="divide-y"></tbody></table>
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50 text-[10px] uppercase text-gray-500 font-bold border-b"><tr><th class="p-3">Chalet</th><th class="p-3">Usuario</th><th class="p-3 text-right">Acción</th></tr></thead>
+                            <tbody id="mem-table" class="divide-y divide-gray-100"></tbody>
+                        </table>
                     </div>
                 </section>
 
-                <section id="view-admin" class="hidden">
-                    <h2 class="text-2xl font-bold mb-4 text-yellow-600">Admin</h2>
-                    <div class="ios-card bg-yellow-50 p-4 border border-yellow-200">
-                        <button onclick="ONS.Backup.download()" class="w-full h-12 bg-yellow-600 text-white font-bold rounded-xl mb-3 shadow">Descargar Backup</button>
-                        <label class="w-full h-12 bg-white text-yellow-800 border border-yellow-200 font-bold rounded-xl flex items-center justify-center">Restaurar<input type="file" class="hidden" onchange="ONS.Backup.upload(this)"></label>
+                <section id="view-admin" class="view-section hidden">
+                    <h2 class="text-2xl font-bold mb-4 text-yellow-600 px-1">Admin Panel</h2>
+                    <div class="ios-card bg-yellow-50 p-5 border border-yellow-200">
+                        <h3 class="font-bold text-yellow-900 mb-3 text-sm uppercase">Base de Datos</h3>
+                        <div class="space-y-3">
+                            <button onclick="ONS.Backup.download()" class="w-full h-12 bg-yellow-600 text-white font-bold rounded-xl shadow active:scale-95 flex items-center justify-center gap-2">
+                                <i data-lucide="download" class="w-4 h-4"></i> Descargar Copia Seguridad
+                            </button>
+                            <label class="w-full h-12 bg-white text-yellow-800 border border-yellow-200 font-bold rounded-xl flex items-center justify-center cursor-pointer active:bg-yellow-50 gap-2">
+                                <i data-lucide="upload" class="w-4 h-4"></i> Restaurar Copia
+                                <input type="file" class="hidden" onchange="ONS.Backup.upload(this)">
+                            </label>
+                        </div>
                     </div>
                 </section>
 
-                <section id="view-members" class="hidden">
-                    <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">Equipo</h2><button onclick="ONS.UI.Members.modal()" class="bg-green-500 text-white w-10 h-10 rounded-full font-bold shadow text-xl">+</button></div>
-                    <div class="ios-card"><table class="w-full text-sm"><tbody id="mem-table" class="divide-y"></tbody></table></div>
+                <section id="view-help" class="view-section hidden">
+                    <h2 class="text-2xl font-bold mb-4 px-1">Ayuda</h2>
+                    <div class="ios-card p-5 prose text-sm text-gray-600">
+                        <h4 class="font-bold text-blue-900">¿Cómo registro mi entreno?</h4>
+                        <p>En la pestaña <strong>Inicio</strong>, selecciona el ejercicio. Aparecerán 4 casillas. Rellena el peso (Kg) y las repeticiones (Rps) de las series que hagas. No es obligatorio llenar las 4.</p>
+                        <hr class="my-4 border-gray-100">
+                        <h4 class="font-bold text-blue-900">¿Cómo veo mi progreso?</h4>
+                        <p>En la pestaña <strong>Informes</strong> puedes ver gráficas de tu asistencia y de tu fuerza en cada ejercicio.</p>
+                    </div>
                 </section>
 
             </div>
         </div>
 
-        <nav class="h-20 bg-white border-t flex justify-around items-start pt-3 pb-safe z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <button onclick="ONS.UI.nav('home')" id="btn-home" class="nav-item flex flex-col items-center w-full text-gray-400"><i data-lucide="home" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-bold">Inicio</span></button>
-            <button onclick="ONS.UI.nav('reports')" id="btn-reports" class="nav-item flex flex-col items-center w-full text-gray-400"><i data-lucide="bar-chart-2" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-bold">Evolución</span></button>
-            <button onclick="ONS.UI.nav('members')" id="btn-members" class="hidden nav-item flex-col items-center w-full text-gray-400"><i data-lucide="users" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-bold">Equipo</span></button>
-            <button onclick="ONS.UI.nav('admin')" id="btn-admin" class="hidden nav-item flex-col items-center w-full text-yellow-600"><i data-lucide="shield" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-bold">Admin</span></button>
+        <nav class="h-20 bg-white border-t border-gray-200 flex justify-around items-start pt-3 pb-safe z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+            <button onclick="ONS.UI.nav('home')" id="btn-home" class="nav-item flex flex-col items-center w-1/5"><i data-lucide="home" class="w-6 h-6 mb-1"></i><span class="text-[9px] font-bold uppercase">Inicio</span></button>
+            <button onclick="ONS.UI.nav('reports')" id="btn-reports" class="nav-item flex flex-col items-center w-1/5"><i data-lucide="bar-chart-2" class="w-6 h-6 mb-1"></i><span class="text-[9px] font-bold uppercase">Informes</span></button>
+            <button onclick="ONS.UI.nav('members')" id="btn-members" class="nav-item hidden flex-col items-center w-1/5"><i data-lucide="users" class="w-6 h-6 mb-1"></i><span class="text-[9px] font-bold uppercase">Miembros</span></button>
+            <button onclick="ONS.UI.nav('admin')" id="btn-admin" class="nav-item hidden flex-col items-center w-1/5 text-yellow-600"><i data-lucide="shield" class="w-6 h-6 mb-1"></i><span class="text-[9px] font-bold uppercase">Admin</span></button>
+            <button onclick="ONS.UI.nav('help')" id="btn-help" class="nav-item flex flex-col items-center w-1/5"><i data-lucide="help-circle" class="w-6 h-6 mb-1"></i><span class="text-[9px] font-bold uppercase">Ayuda</span></button>
         </nav>
     </div>
 
-    <div id="modal-member" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-6">
-            <h3 class="font-bold text-xl mb-4">Usuario</h3>
+    <div id="modal-member" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-member-title" class="text-xl font-bold mb-4 text-gray-900">Nuevo Usuario</h3>
             <form onsubmit="ONS.UI.Members.save(event)" class="space-y-3">
                 <input type="hidden" id="m-id">
-                <div class="flex gap-2"><input id="m-name" class="w-1/2 h-10 border px-2" placeholder="Nombre" required><input id="m-last" class="w-1/2 h-10 border px-2" placeholder="Apellido" required></div>
-                <input id="m-chalet" class="w-full h-10 border px-2" placeholder="Chalet" required>
-                <input id="m-pass" class="w-full h-10 border px-2" placeholder="Pass">
-                <label class="flex items-center gap-2"><input type="checkbox" id="m-admin"> Admin</label>
-                <div class="flex gap-2 mt-4"><button type="button" onclick="document.getElementById('modal-member').classList.add('hidden')" class="flex-1 h-10 bg-gray-200 font-bold rounded">Cancelar</button><button type="submit" class="flex-1 h-10 bg-blue-600 text-white font-bold rounded">Guardar</button></div>
+                <div class="flex gap-3">
+                    <input id="m-name" class="w-1/2 h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 font-bold" placeholder="Nombre" required>
+                    <input id="m-last" class="w-1/2 h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 font-bold" placeholder="Apellido" required>
+                </div>
+                <input id="m-chalet" class="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 font-bold" placeholder="Chalet / Unidad" required>
+                <input id="m-pass" class="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 font-bold" placeholder="Contraseña (Opcional)">
+                <div id="cnt-isadmin" class="bg-gray-50 p-3 rounded-xl flex items-center gap-3">
+                    <input type="checkbox" id="m-admin" class="w-5 h-5 rounded text-blue-600"><label for="m-admin" class="font-bold text-gray-600 text-sm">Es Administrador</label>
+                </div>
+                <div class="flex gap-3 mt-4">
+                    <button type="button" onclick="document.getElementById('modal-member').style.display='none'" class="flex-1 h-12 bg-gray-100 font-bold rounded-xl text-gray-600">Cancelar</button>
+                    <button type="submit" class="flex-1 h-12 bg-blue-600 text-white font-bold rounded-xl shadow">Guardar</button>
+                </div>
             </form>
         </div>
     </div>
 
     <script>
-        // CHIVATO DE ERRORES GLOBAL
-        window.onerror = function(msg, url, line) { alert("ERROR CRÍTICO JS:\n" + msg + "\nLínea: " + line); };
+        window.onerror = function(msg) { console.error(msg); return false; };
 
         const ONS = {
             Utils: { 
                 uuid: () => Math.random().toString(36).substr(2, 9), 
                 date: (d) => new Date(d).toLocaleDateString('es-ES', {day:'2-digit', month:'2-digit'}) 
             },
+            Catalog: [
+                { id: "leg_sq_gob", name: "Goblet Squat", group: "PIERNAS" }, { id: "leg_dl_rom", name: "Peso Muerto Rumano", group: "PIERNAS" }, { id: "leg_lng", name: "Zancadas", group: "PIERNAS" }, { id: "leg_sq_bul", name: "Sentadilla Búlgara", group: "PIERNAS" },
+                { id: "push_bp_flat", name: "Press Banca Plano", group: "PECHO" }, { id: "push_bp_inc", name: "Press Banca Inclinado", group: "PECHO" }, { id: "push_fly", name: "Aperturas", group: "PECHO" }, { id: "push_trx", name: "Chest Press TRX", group: "PECHO" },
+                { id: "pull_lat", name: "Jalón al Pecho", group: "DORSAL" }, { id: "pull_row_cab", name: "Remo en Polea", group: "DORSAL" }, { id: "pull_row_db", name: "Remo a una mano", group: "DORSAL" }, { id: "pull_row_trx", name: "Remo Invertido", group: "DORSAL" },
+                { id: "sh_press", name: "Press Militar", group: "HOMBROS" }, { id: "sh_lat", name: "Elevaciones Laterales", group: "HOMBROS" }, { id: "sh_front", name: "Elevaciones Anteriores", group: "HOMBROS" }, { id: "sh_yt", name: "Aperturas Y/T", group: "HOMBROS" },
+                { id: "arm_curl", name: "Curl Bíceps", group: "BÍCEPS" }, { id: "arm_ham", name: "Curl Martillo", group: "BÍCEPS" }, { id: "arm_cbl", name: "Curl Polea", group: "BÍCEPS" }, { id: "arm_trx", name: "Curl TRX", group: "BÍCEPS" },
+                { id: "tri_pd", name: "Jalón Tríceps", group: "TRÍCEPS" }, { id: "tri_oh", name: "Jalón tras nuca", group: "TRÍCEPS" }, { id: "tri_dips", name: "Fondos", group: "TRÍCEPS" }, { id: "tri_cup", name: "Extensión Copa", group: "TRÍCEPS" },
+                { id: "core_plk", name: "Plancha", group: "CORE" }, { id: "core_plk_trx", name: "Plancha TRX", group: "CORE" }, { id: "core_rus", name: "Russian Twist", group: "CORE" }, { id: "core_farm", name: "Paseo Granjero", group: "CORE" }
+            ],
             Data: {
                 users: [], logs: [],
                 init() {
                     try {
-                        this.users = JSON.parse(localStorage.getItem('ons_users') || '[]');
+                        const rawU = localStorage.getItem('ons_users');
+                        this.users = rawU ? JSON.parse(rawU) : [];
                         this.logs = JSON.parse(localStorage.getItem('ons_logs') || '[]');
-                        if(this.users.length===0) {
+                        
+                        // FIX COMPATIBILIDAD VIEJA
+                        let dirty = false;
+                        if(this.users.length === 0) {
                             this.users.push({id:'admin', user:'LuisG_33', pass:'admin', name:'Luis', last:'Gimeno', chalet:'33', role:'ADMIN'});
-                            localStorage.setItem('ons_users', JSON.stringify(this.users));
+                            dirty = true;
+                        } else {
+                            this.users.forEach(u => {
+                                if(u.username && !u.user) { u.user = u.username; dirty=true; }
+                                if(!u.id && u.userId) { u.id = u.userId; dirty=true; }
+                            });
                         }
-                    } catch(e) { alert("Error Data Init: " + e); }
+                        if(dirty) this.save();
+                    } catch(e) { console.error("Error init"); }
                 },
                 save() { localStorage.setItem('ons_users', JSON.stringify(this.users)); localStorage.setItem('ons_logs', JSON.stringify(this.logs)); }
             },
@@ -184,88 +323,75 @@
                 me: null,
                 login(e) {
                     e.preventDefault();
-                    try {
-                        const uVal = document.getElementById('login-user').value.trim().toLowerCase();
-                        const pVal = document.getElementById('login-pass').value;
-                        const user = ONS.Data.users.find(u => u.user.toLowerCase() === uVal && u.pass === pVal);
-                        
-                        if(user) {
-                            this.me = user;
-                            if(user.pass === 'admin') {
-                                const newP = prompt("Por seguridad, cambia tu contraseña por defecto 'admin':");
-                                if(newP && newP.length>3) { user.pass=newP; ONS.Data.save(); }
-                            }
-                            ONS.UI.start();
-                        } else { alert("Usuario o contraseña incorrectos"); }
-                    } catch(err) { alert("Error Login: " + err); }
+                    const uIn = document.getElementById('login-user').value.trim().toLowerCase();
+                    const pIn = document.getElementById('login-pass').value;
+                    const found = ONS.Data.users.find(u => (u.user || u.username || '').toLowerCase() === uIn && (u.pass || u.password) == pIn);
+                    if(found) {
+                        this.me = found;
+                        ONS.UI.start();
+                    } else alert("Datos incorrectos");
                 },
                 logout() { location.reload(); }
             },
             UI: {
-                chart: null,
+                chart: null, chart2: null,
                 start() {
                     document.getElementById('layer-login').style.display = 'none';
-                    document.getElementById('layer-app').style.display = 'flex'; // FLEX IMPORTANTE
-                    
-                    document.getElementById('header-user').innerText = ONS.Auth.me.user;
+                    document.getElementById('layer-app').style.display = 'flex';
+                    document.getElementById('header-user').innerText = ONS.Auth.me.user || ONS.Auth.me.username;
                     
                     if(ONS.Auth.me.role === 'ADMIN') {
-                        document.querySelectorAll('.hidden').forEach(el => {
-                            if(el.id.includes('btn-') || el.id.includes('admin-')) el.classList.remove('hidden');
-                        });
+                        ['btn-members','btn-admin','home-admin-wrapper','rep-adm-wrap'].forEach(id => document.getElementById(id).classList.remove('hidden'));
                         this.Members.render();
                     }
-                    
                     this.Home.init();
                     this.nav('home');
                     lucide.createIcons();
                 },
                 nav(id) {
-                    ['home','reports','admin','members'].forEach(v => document.getElementById('view-'+v).style.display = 'none');
-                    document.getElementById('view-'+id).style.display = 'block';
-                    
-                    ['home','reports','admin','members'].forEach(v => {
-                        const btn = document.getElementById('btn-'+v);
-                        if(btn) btn.classList.remove('active');
-                    });
-                    const activeBtn = document.getElementById('btn-'+id);
-                    if(activeBtn) activeBtn.classList.add('active');
-
+                    document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                    document.getElementById('view-'+id).classList.remove('hidden');
+                    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                    document.getElementById('btn-'+id).classList.add('active');
                     if(id==='home') this.Home.renderLogs();
                     if(id==='reports') this.Reports.init();
                 },
                 Home: {
                     init() {
-                        const cats = ["Sentadillas","Peso Muerto","Press Banca","Jalon Pecho","Press Militar","Curl Biceps","Triceps Polea","Plancha"];
                         const sel = document.getElementById('exercise-select');
-                        sel.innerHTML = '<option value="">Selecciona...</option>';
-                        cats.forEach(c => sel.innerHTML += `<option value="${c}">${c}</option>`);
+                        sel.innerHTML = '<option value="">Seleccionar...</option>';
+                        // GRUPOS
+                        const groups = [...new Set(ONS.Catalog.map(i=>i.group))];
+                        groups.forEach(g => {
+                            const optgroup = document.createElement('optgroup'); optgroup.label = g;
+                            ONS.Catalog.filter(i=>i.group===g).forEach(ex => {
+                                const op = document.createElement('option'); op.value = ex.id; op.text = ex.name;
+                                optgroup.appendChild(op);
+                            });
+                            sel.appendChild(optgroup);
+                        });
                         document.getElementById('session-date').valueAsDate = new Date();
                         
                         if(ONS.Auth.me.role==='ADMIN') {
-                            const adSel = document.getElementById('admin-sel');
-                            adSel.innerHTML = `<option value="${ONS.Auth.me.id}">Para Mí</option>`;
-                            ONS.Data.users.filter(u=>u.id!==ONS.Auth.me.id).forEach(u => adSel.innerHTML+=`<option value="${u.id}">${u.name} ${u.last}</option>`);
+                            const adSel = document.getElementById('home-member-select');
+                            adSel.innerHTML = `<option value="${ONS.Auth.me.id||ONS.Auth.me.userId}">Para Mí</option>`;
+                            ONS.Data.users.filter(u=>(u.id||u.userId)!==(ONS.Auth.me.id||ONS.Auth.me.userId)).forEach(u => 
+                                adSel.innerHTML+=`<option value="${u.id||u.userId}">${u.name} ${u.last||''}</option>`
+                            );
                         }
                     },
                     updatePreview() {
                         const v = document.getElementById('exercise-select').value;
-                        const grid = document.getElementById('input-grid');
-                        if(v) { 
-                            grid.classList.remove('hidden'); 
-                            document.getElementById('preview-name').innerText = v;
-                            document.getElementById('preview-card').classList.remove('hidden');
-                            document.getElementById('preview-card').style.display = 'flex';
-                        } else { 
-                            grid.classList.add('hidden'); 
-                            document.getElementById('preview-card').classList.add('hidden');
-                        }
+                        const panel = document.getElementById('input-panel');
+                        if(v) panel.classList.remove('hidden'); else panel.classList.add('hidden');
+                        for(let i=1;i<=4;i++){ document.getElementById(`s${i}w`).value=''; document.getElementById(`s${i}r`).value=''; }
                     },
                     save() {
-                        const ex = document.getElementById('exercise-select').value;
-                        if(!ex) return;
-                        
-                        const uid = (ONS.Auth.me.role==='ADMIN' && document.getElementById('admin-sel').value) ? document.getElementById('admin-sel').value : ONS.Auth.me.id;
+                        const exId = document.getElementById('exercise-select').value;
+                        if(!exId) return;
+                        const exName = ONS.Catalog.find(c=>c.id===exId)?.name || exId;
+                        const myId = ONS.Auth.me.id || ONS.Auth.me.userId;
+                        const uid = (ONS.Auth.me.role==='ADMIN' && document.getElementById('home-member-select').value) ? document.getElementById('home-member-select').value : myId;
                         
                         const series = [];
                         for(let i=1;i<=4;i++) {
@@ -275,67 +401,146 @@
                         }
                         
                         ONS.Data.logs.push({
-                            id: ONS.Utils.uuid(),
-                            uid: uid,
-                            date: document.getElementById('session-date').value,
-                            ex: ex,
-                            ser: series,
-                            ts: new Date().toISOString()
+                            id: ONS.Utils.uuid(), uid: uid, date: document.getElementById('session-date').value,
+                            exerciseId: exId, ex: exName, ser: series
                         });
                         ONS.Data.save();
-                        alert("Guardado");
                         this.renderLogs();
-                        // Limpiar inputs
-                        for(let i=1;i<=4;i++) { document.getElementById(`s${i}w`).value=''; document.getElementById(`s${i}r`).value=''; }
+                        this.updatePreview(); // Limpia inputs
+                        alert("Guardado");
                     },
                     renderLogs() {
                         const date = document.getElementById('session-date').value;
-                        const uid = (ONS.Auth.me.role==='ADMIN' && document.getElementById('admin-sel').value) ? document.getElementById('admin-sel').value : ONS.Auth.me.id;
+                        const myId = ONS.Auth.me.id || ONS.Auth.me.userId;
+                        const uid = (ONS.Auth.me.role==='ADMIN' && document.getElementById('home-member-select').value) ? document.getElementById('home-member-select').value : myId;
                         const list = document.getElementById('logs-list');
                         list.innerHTML = '';
                         
-                        const todayLogs = ONS.Data.logs.filter(l => l.uid === uid && l.date === date);
-                        document.getElementById('today-count').innerText = todayLogs.length;
+                        const logs = ONS.Data.logs.filter(l => l.uid === uid && l.date === date && !l.deleted);
+                        document.getElementById('today-count').innerText = logs.length;
                         
-                        todayLogs.forEach(l => {
-                            const txt = l.ser.map((s,i) => `S${i+1}:${s.w}/${s.r}`).join(' ');
-                            list.innerHTML += `<div class="bg-white p-3 rounded-xl border flex justify-between items-center"><div><div class="font-bold text-sm">${l.ex}</div><div class="text-xs text-gray-500">${txt}</div></div><button onclick="if(confirm('Borrar?')){ONS.Data.logs=ONS.Data.logs.filter(x=>x.id!='${l.id}');ONS.Data.save();ONS.UI.Home.renderLogs();}" class="text-red-500">×</button></div>`;
+                        logs.forEach(l => {
+                            const txt = l.ser.map((s,i) => `<span class="bg-gray-100 px-1 rounded text-xs font-mono font-bold">S${i+1}:${s.w}/${s.r}</span>`).join(' ');
+                            list.innerHTML += `<div class="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm"><div><div class="font-bold text-sm text-blue-900">${l.ex}</div><div class="mt-1 flex flex-wrap gap-1">${txt}</div></div><button onclick="if(confirm('¿Borrar?')){ONS.Data.deleteLog('${l.id}');ONS.UI.Home.renderLogs();}" class="text-red-400 p-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
                         });
+                        lucide.createIcons();
                     }
                 },
                 Reports: {
-                    init() { this.update(); }, // Simplificado para debugging
+                    init() {
+                        const adSel = document.getElementById('rep-adm-sel');
+                        if(ONS.Auth.me.role==='ADMIN') {
+                            adSel.innerHTML = '';
+                            ONS.Data.users.forEach(u => adSel.innerHTML+=`<option value="${u.id||u.userId}">${u.name} ${u.last||''}</option>`);
+                        }
+                        const exSel = document.getElementById('rep-ex-sel');
+                        exSel.innerHTML = '';
+                        ONS.Catalog.forEach(c => exSel.innerHTML+=`<option value="${c.id}">${c.name}</option>`);
+                        this.update();
+                    },
                     update() {
-                        // Dummy chart rendering logic to prevent crash
-                        const ctx = document.getElementById('chart-cv');
+                        const myId = ONS.Auth.me.id || ONS.Auth.me.userId;
+                        const uid = (ONS.Auth.me.role==='ADMIN' && document.getElementById('rep-adm-sel').value) ? document.getElementById('rep-adm-sel').value : myId;
+                        const exId = document.getElementById('rep-ex-sel').value;
+                        const metric = document.getElementById('rep-met-sel').value;
+                        
+                        const allLogs = ONS.Data.logs.filter(l => l.uid === uid && !l.deleted);
+                        const exLogs = allLogs.filter(l => l.exerciseId === exId).sort((a,b) => new Date(a.date) - new Date(b.date));
+                        
+                        // KPIs
+                        document.getElementById('rep-stat-days').innerText = new Set(allLogs.map(l=>l.date)).size;
+                        document.getElementById('rep-stat-total').innerText = allLogs.length;
+
+                        // CHART 1: Attendance (Simple Bar)
+                        const attMap = {}; allLogs.forEach(l => attMap[l.date.substring(0,7)] = (attMap[l.date.substring(0,7)]||0)+1);
+                        const attLbl = Object.keys(attMap).sort();
+                        if(this.chart2) this.chart2.destroy();
+                        this.chart2 = new Chart(document.getElementById('chart-attend'), {
+                            type:'bar', data: { labels: attLbl, datasets: [{ label:'Registros', data: attLbl.map(k=>attMap[k]), backgroundColor:'#3b82f6' }] },
+                            options: { maintainAspectRatio:false, plugins:{legend:{display:false}} }
+                        });
+
+                        // CHART 2: Evolution
+                        const labels = exLogs.map(l => ONS.Utils.date(l.date));
+                        const data = exLogs.map(l => {
+                            if(metric==='max') return Math.max(...l.ser.map(s=>parseFloat(s.w)||0));
+                            if(metric==='vol') return l.ser.reduce((a,b)=>a+(parseFloat(b.r)||0),0);
+                            return l.ser.reduce((a,b)=>a+(parseFloat(b.w)*parseFloat(b.r)||0),0);
+                        });
+                        
                         if(this.chart) this.chart.destroy();
-                        this.chart = new Chart(ctx, {type:'line', data:{labels:['Ini'], datasets:[{data:[0]}]}});
+                        this.chart = new Chart(document.getElementById('chart-evo'), {
+                            type:'line', data: { labels: labels, datasets: [{ data: data, borderColor:'#9333ea', tension:0.3, pointRadius:4 }] },
+                            options: { maintainAspectRatio:false, plugins:{legend:{display:false}} }
+                        });
+
+                        // TABLE
+                        const tb = document.getElementById('rep-table'); tb.innerHTML = '';
+                        [...exLogs].reverse().forEach(l => {
+                            const txt = l.ser.map((s,i) => `S${i+1}:${s.w}x${s.r}`).join(', ');
+                            tb.innerHTML += `<tr class="border-b"><td class="p-3 font-mono text-gray-500">${ONS.Utils.date(l.date)}</td><td class="p-3 font-bold text-gray-800">${txt}</td><td class="p-3 text-right"><button class="text-red-400" onclick="ONS.Data.deleteLog('${l.id}');ONS.UI.Reports.update()">×</button></td></tr>`;
+                        });
                     }
                 },
                 Members: {
                     render() {
-                        const tb = document.getElementById('mem-table');
-                        tb.innerHTML = '';
+                        const tb = document.getElementById('mem-table'); tb.innerHTML = '';
                         ONS.Data.users.forEach(u => {
-                            tb.innerHTML += `<tr><td class="p-3">${u.chalet}</td><td class="p-3 font-bold">${u.name}</td></tr>`;
+                            const isMe = (u.id||u.userId) === (ONS.Auth.me.id||ONS.Auth.me.userId);
+                            const delBtn = isMe ? '' : `<button onclick="if(confirm('¿Eliminar usuario?')){ONS.Data.users=ONS.Data.users.filter(x=>(x.id||x.userId)!='${u.id||u.userId}');ONS.Data.save();ONS.UI.Members.render();}" class="text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`;
+                            tb.innerHTML += `<tr><td class="p-3 font-mono text-gray-500">${u.chalet}</td><td class="p-3 font-bold text-gray-900">${u.name} ${u.last||''} <span class="text-xs text-gray-400">(${u.user||u.username})</span></td><td class="p-3 text-right flex justify-end gap-3"><button onclick="ONS.UI.Members.edit('${u.id||u.userId}')" class="text-blue-500"><i data-lucide="edit-2" class="w-4 h-4"></i></button>${delBtn}</td></tr>`;
                         });
+                        lucide.createIcons();
                     },
-                    modal() { document.getElementById('modal-member').classList.remove('hidden'); },
+                    modal() { 
+                        document.getElementById('modal-member').style.display='flex'; 
+                        document.getElementById('m-id').value=''; 
+                        document.getElementById('modal-member-title').innerText='Nuevo Usuario';
+                        ['m-name','m-last','m-chalet','m-pass'].forEach(id=>document.getElementById(id).value='');
+                    },
+                    openReg() { 
+                        document.getElementById('layer-login').style.display='none';
+                        document.getElementById('layer-app').style.display='flex'; 
+                        this.modal(); // Hack visual para abrir modal sobre fondo vacío
+                    },
+                    edit(id) {
+                        const u = ONS.Data.users.find(x=>(x.id||x.userId)===id);
+                        if(!u) return;
+                        this.modal();
+                        document.getElementById('modal-member-title').innerText='Editar Usuario';
+                        document.getElementById('m-id').value=u.id||u.userId;
+                        document.getElementById('m-name').value=u.name;
+                        document.getElementById('m-last').value=u.last||'';
+                        document.getElementById('m-chalet').value=u.chalet;
+                        document.getElementById('m-admin').checked = (u.role==='ADMIN');
+                    },
                     save(e) {
                         e.preventDefault();
-                        const u = {
-                            id: ONS.Utils.uuid(),
+                        const id = document.getElementById('m-id').value;
+                        const data = {
                             name: document.getElementById('m-name').value,
                             last: document.getElementById('m-last').value,
                             chalet: document.getElementById('m-chalet').value,
-                            user: document.getElementById('m-name').value + document.getElementById('m-chalet').value,
-                            pass: document.getElementById('m-pass').value || '1234',
+                            pass: document.getElementById('m-pass').value,
                             role: document.getElementById('m-admin').checked ? 'ADMIN' : 'USER'
                         };
-                        ONS.Data.users.push(u);
+                        
+                        if(id) {
+                            const idx = ONS.Data.users.findIndex(u=>(u.id||u.userId)===id);
+                            if(idx>=0) {
+                                ONS.Data.users[idx] = {...ONS.Data.users[idx], ...data};
+                                if(data.pass) ONS.Data.users[idx].pass = data.pass; // Solo si se escribe
+                            }
+                        } else {
+                            // Crear
+                            data.id = ONS.Utils.uuid();
+                            data.user = (data.name + data.chalet).replace(/\s/g,'');
+                            if(!data.pass) data.pass = '1234';
+                            ONS.Data.users.push(data);
+                            alert("Usuario creado: " + data.user);
+                        }
                         ONS.Data.save();
-                        document.getElementById('modal-member').classList.add('hidden');
-                        alert("Usuario creado: " + u.user);
+                        document.getElementById('modal-member').style.display='none';
                         this.render();
                     }
                 }
@@ -343,24 +548,20 @@
             Backup: {
                 download() {
                     const b = new Blob([JSON.stringify(ONS.Data)], {type:'application/json'});
-                    const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='backup.json'; a.click();
+                    const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='ons_backup.json'; a.click();
                 },
                 upload(el) {
                     const r = new FileReader();
                     r.onload = e => {
                         const d = JSON.parse(e.target.result);
-                        if(d.users) { ONS.Data.users = d.users; ONS.Data.logs = d.logs || []; ONS.Data.save(); location.reload(); }
+                        if(d.users) { ONS.Data.users=d.users; ONS.Data.logs=d.logs||[]; ONS.Data.save(); location.reload(); }
                     };
                     r.readAsText(el.files[0]);
                 }
             }
         };
         
-        // BOOT
-        document.addEventListener('DOMContentLoaded', () => {
-            ONS.Data.init();
-            lucide.createIcons();
-        });
+        document.addEventListener('DOMContentLoaded', ONS.Data.init);
     </script>
 </body>
 </html>
