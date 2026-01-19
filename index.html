@@ -48,25 +48,26 @@
         .chart-container-sm { position: relative; height: 200px; width: 100%; }
         .chart-container-md { position: relative; height: 250px; width: 100%; }
 
+        /* Estilos Tarjetas Móvil */
         @media (max-width: 768px) {
             .mobile-card-table thead { display: none; }
-            .mobile-card-table tr { display: block; background: white; margin-bottom: 1rem; border-radius: 1rem; border: 1px solid #e5e7eb; padding: 1rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+            .mobile-card-table tr { display: block; background: white; margin-bottom: 0.75rem; border-radius: 1rem; border: 1px solid #e5e7eb; padding: 0.75rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
             .mobile-card-table td { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6; }
-            .mobile-card-table td:last-child { border-bottom: none; justify-content: flex-end; padding-top: 1rem; }
-            .mobile-card-table td::before { content: attr(data-label); font-weight: 700; color: #6b7280; font-size: 0.75rem; text-transform: uppercase; margin-right: 1rem; }
+            .mobile-card-table td:last-child { border-bottom: none; justify-content: flex-end; padding-top: 0.5rem; }
+            .mobile-card-table td::before { content: attr(data-label); font-weight: 700; color: #6b7280; font-size: 0.70rem; text-transform: uppercase; margin-right: 1rem; }
         }
     </style>
 </head>
 <body class="text-gray-800 flex flex-col overflow-hidden bg-gray-50">
 
-    <header id="main-header" class="bg-blue-900 text-white shadow-md flex-shrink-0 z-30 hidden md:flex sticky top-0">
-        <div class="max-w-6xl mx-auto px-4 h-16 w-full flex items-center justify-between">
+    <header id="main-header" class="bg-blue-900 text-white shadow-md flex-shrink-0 z-30 flex sticky top-0 h-14 md:h-16 items-center">
+        <div class="max-w-6xl mx-auto px-4 w-full flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <i data-lucide="dumbbell" class="w-6 h-6 text-blue-300"></i>
                 <span class="font-bold text-xl tracking-wide">Team ONS</span>
                 <span id="header-user-badge" class="ml-2 text-[10px] uppercase bg-blue-800 px-2 py-0.5 rounded text-blue-200 tracking-wider"></span>
             </div>
-            <nav class="flex space-x-2 text-sm font-medium">
+            <nav class="hidden md:flex space-x-2 text-sm font-medium">
                 <button id="nav-btn-home" onclick="ONS.UI.navigateTo('home')" class="nav-btn px-4 py-2 rounded hover:bg-blue-800 text-blue-100 transition">Inicio</button>
                 <button id="nav-btn-reports" onclick="ONS.UI.navigateTo('reports')" class="nav-btn px-4 py-2 rounded hover:bg-blue-800 text-blue-100 transition">Informes</button>
                 <button id="nav-btn-members" onclick="ONS.UI.navigateTo('members')" class="nav-btn px-4 py-2 rounded hover:bg-blue-800 text-blue-100 hidden">Miembros</button>
@@ -77,8 +78,8 @@
         </div>
     </header>
 
-    <main class="flex-grow overflow-y-auto w-full relative" id="main-container">
-        <div class="max-w-md md:max-w-6xl mx-auto px-4 pt-6 pb-32 w-full">
+    <main class="flex-grow overflow-y-auto w-full relative bg-gray-50" id="main-container">
+        <div class="max-w-md md:max-w-6xl mx-auto px-3 pt-4 pb-32 w-full">
 
             <section id="view-login" class="view-section flex flex-col items-center justify-center min-h-[85dvh]">
                 <div class="w-full max-w-sm bg-white rounded-3xl shadow-xl p-8 fade-in border border-gray-100">
@@ -101,60 +102,57 @@
             </section>
 
             <section id="view-home" class="view-section hidden">
-                <div class="md:hidden flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-black text-gray-900">Entrenar</h1>
-                    <div class="bg-blue-100 text-blue-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider" id="mobile-user-badge"></div>
-                </div>
-
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden mb-8 fade-in relative">
-                    <div class="bg-gray-50 px-5 py-4 border-b border-gray-100 flex justify-between items-center">
-                        <h2 class="font-bold text-gray-700 flex items-center gap-2 text-sm uppercase tracking-wide"><i data-lucide="calendar" class="w-4 h-4 text-blue-600"></i> Sesión</h2>
-                        <input type="date" id="session-date" onchange="ONS.UI.Home.renderSessionLogs()" class="bg-white border border-gray-300 text-gray-900 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 font-bold text-sm">
+                
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-5 fade-in relative">
+                    <div class="bg-gray-50 px-3 py-2 border-b border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center gap-2 text-sm font-bold text-gray-700"><i data-lucide="calendar" class="w-4 h-4 text-blue-600"></i> <span class="hidden xs:inline">Sesión:</span></div>
+                        <input type="date" id="session-date" onchange="ONS.UI.Home.renderSessionLogs()" class="bg-transparent border-0 text-gray-900 rounded-lg py-1 px-0 outline-none font-bold text-sm text-right w-32 focus:ring-0">
                     </div>
                     
-                    <div class="p-5">
-                        <div id="home-admin-mode" class="mb-5 hidden bg-yellow-50 p-4 rounded-2xl border border-yellow-200">
-                            <label class="block text-xs font-bold text-yellow-800 uppercase mb-2 flex items-center gap-1"><i data-lucide="user-check" class="w-3 h-3"></i> Registrar para:</label>
-                            <select id="home-member-select" onchange="ONS.UI.Home.renderSessionLogs()" class="w-full border-yellow-300 border rounded-xl p-3 text-gray-900 bg-white focus:ring-2 focus:ring-yellow-500 outline-none font-bold shadow-sm h-12"></select>
+                    <div class="p-3">
+                        <div id="home-admin-mode" class="mb-3 hidden bg-yellow-50 p-2 rounded-xl border border-yellow-200">
+                            <label class="block text-[10px] font-bold text-yellow-800 uppercase mb-1 flex items-center gap-1"><i data-lucide="user-check" class="w-3 h-3"></i> Registrar para:</label>
+                            <select id="home-member-select" onchange="ONS.UI.Home.renderSessionLogs()" class="w-full border-yellow-300 border rounded-lg p-2 text-gray-900 bg-white focus:ring-1 focus:ring-yellow-500 outline-none font-bold text-sm"></select>
                         </div>
 
-                        <div class="mb-6">
-                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2 pl-1">Seleccionar Ejercicio</label>
-                            <select id="exercise-select" onchange="ONS.UI.Home.updatePreview()" class="w-full border border-gray-300 rounded-2xl px-4 text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 outline-none transition appearance-none shadow-sm text-lg font-medium h-14 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%22%20stroke%3D%22%239CA3AF%22%20stroke-width%3D%222%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.5em_1.5em] bg-[right_1rem_center] bg-no-repeat"><option value="">Busca aquí...</option></select>
+                        <div class="mb-3">
+                            <select id="exercise-select" onchange="ONS.UI.Home.updatePreview()" class="w-full border border-gray-300 rounded-xl px-3 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 outline-none transition appearance-none shadow-sm text-base font-medium bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%22%20stroke%3D%22%239CA3AF%22%20stroke-width%3D%222%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.2em_1.2em] bg-[right_0.8rem_center] bg-no-repeat"><option value="">Selecciona Ejercicio...</option></select>
                         </div>
 
-                        <div id="exercise-preview-card" class="hidden mb-6 bg-blue-50 rounded-2xl p-4 flex gap-4 items-center border border-blue-100">
-                            <div class="bg-white p-2 rounded-xl shadow-sm flex-shrink-0 w-16 h-16 flex items-center justify-center">
-                                <img id="preview-img" src="" class="w-full h-full object-contain" onerror="this.style.display='none'">
+                        <div id="exercise-preview-card" class="hidden mb-3 bg-blue-50 rounded-xl p-3 flex gap-3 items-center border border-blue-100">
+                            <div class="bg-white p-1.5 rounded-lg shadow-sm flex-shrink-0 w-14 h-14 flex items-center justify-center border border-blue-50">
+                                <img id="preview-img" src="" class="w-full h-full object-contain">
                             </div>
-                            <div>
-                                <h3 id="preview-name" class="font-bold text-blue-900 text-lg leading-tight"></h3>
-                                <p id="preview-notes" class="text-sm text-blue-700/80 leading-snug mt-1"></p>
+                            <div class="overflow-hidden">
+                                <h3 id="preview-name" class="font-bold text-blue-900 text-sm leading-tight truncate"></h3>
+                                <p id="preview-notes" class="text-xs text-blue-700/80 leading-snug mt-0.5 line-clamp-2"></p>
                             </div>
                         </div>
 
                         <div id="series-container" class="hidden">
-                            <div class="grid grid-cols-4 gap-2 mb-2 text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest"><div>S1</div> <div>S2</div> <div>S3</div> <div>S4</div></div>
-                            <div class="grid grid-cols-4 gap-3 mb-24 md:mb-6">
-                                <div class="space-y-2"><input type="number" id="s1-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-lg font-bold"><input type="number" id="s1-reps" placeholder="Rps" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm bg-gray-50 text-lg"></div>
-                                <div class="space-y-2"><input type="number" id="s2-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm text-lg font-bold"><input type="number" id="s2-reps" placeholder="Rps" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm bg-gray-50 text-lg"></div>
-                                <div class="space-y-2"><input type="number" id="s3-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm text-lg font-bold"><input type="number" id="s3-reps" placeholder="Rps" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm bg-gray-50 text-lg"></div>
-                                <div class="space-y-2"><input type="number" id="s4-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm text-lg font-bold"><input type="number" id="s4-reps" placeholder="Rps" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm bg-gray-50 text-lg"></div>
+                            <div class="grid grid-cols-4 gap-1.5 mb-1.5 text-center text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                                <div>S1</div> <div>S2</div> <div>S3</div> <div>S4</div>
                             </div>
-                            <div class="fixed bottom-[85px] left-0 right-0 px-4 md:static md:p-0 z-20">
-                                <button onclick="ONS.UI.Home.saveLog()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-xl active:scale-[0.98] transition-transform flex items-center justify-center gap-2 text-lg border border-blue-500/50 backdrop-blur-sm">
-                                    <i data-lucide="check-circle" class="w-6 h-6"></i> <span>Guardar Serie</span>
-                                </button>
+                            <div class="grid grid-cols-4 gap-2 mb-4"> 
+                                <div class="space-y-1"><input type="number" id="s1-kg" placeholder="Kg" inputmode="decimal" class="w-full h-10 border-gray-200 border rounded-lg text-center shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-base font-bold p-0"><input type="number" id="s1-reps" placeholder="Rps" inputmode="decimal" class="w-full h-10 border-gray-200 border rounded-lg text-center shadow-sm bg-gray-50 text-base p-0"></div>
+                                <div class="space-y-1"><input type="number" id="s2-kg" placeholder="Kg" inputmode="decimal" class="w-full h-10 border-gray-200 border rounded-lg text-center shadow-sm text-base font-bold p-0"><input type="number" id="s2-reps" placeholder="Rps" inputmode="decimal" class="w-full h-10 border-gray-200 border rounded-lg text-center shadow-sm bg-gray-50 text-base p-0"></div>
+                                <div class="space-y-1"><input type="number" id="s3-kg" placeholder="Kg" inputmode="decimal" class="w-full h-10 border-gray-200 border rounded-lg text-center shadow-sm text-base font-bold p-0"><input type="number" id="s3-reps" placeholder="Rps" inputmode="decimal" class="w-full h-10 border-gray-200 border rounded-lg text-center shadow-sm bg-gray-50 text-base p-0"></div>
+                                <div class="space-y-1"><input type="number" id="s4-kg" placeholder="Kg" inputmode="decimal" class="w-full h-10 border-gray-200 border rounded-lg text-center shadow-sm text-base font-bold p-0"><input type="number" id="s4-reps" placeholder="Rps" inputmode="decimal" class="w-full h-10 border-gray-200 border rounded-lg text-center shadow-sm bg-gray-50 text-base p-0"></div>
                             </div>
+
+                            <button onclick="ONS.UI.Home.saveLog()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2 text-base">
+                                <i data-lucide="check-circle" class="w-5 h-5"></i> 
+                                <span>Guardar Serie</span>
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 mb-4 px-1">
-                    <i data-lucide="list-checks" class="w-5 h-5 text-gray-400"></i>
-                    <h3 class="text-lg font-bold text-gray-800">Hecho hoy</h3>
+                <div class="flex items-center gap-2 mb-3 px-1 mt-6">
+                    <i data-lucide="list-checks" class="w-4 h-4 text-gray-400"></i>
+                    <h3 class="text-base font-bold text-gray-700">Hecho hoy</h3>
                 </div>
-                <div id="session-logs-list" class="space-y-3 pb-safe"></div>
+                <div id="session-logs-list" class="space-y-2.5 pb-safe"></div>
             </section>
 
             <section id="view-members" class="view-section hidden">
@@ -162,10 +160,10 @@
                     <h2 class="text-2xl font-black text-gray-900">Miembros</h2>
                     <button onclick="ONS.UI.Members.openModal()" class="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow active:scale-95 transition flex gap-2 items-center"><i data-lucide="user-plus" class="w-5 h-5"></i> Nuevo</button>
                 </div>
-                <div class="bg-white md:rounded-3xl shadow-sm border border-gray-200 overflow-hidden -mx-4 md:mx-0">
+                <div class="bg-white md:rounded-3xl shadow-sm border border-gray-200 overflow-hidden -mx-3 md:mx-0">
                     <table class="w-full text-sm text-left mobile-card-table">
                         <thead class="bg-gray-50 text-gray-500 uppercase text-xs font-semibold border-b"><tr><th class="p-4">Chalet</th><th class="p-4">Nombre</th><th class="p-4">Usuario</th><th class="p-4 text-center">Acciones</th></tr></thead>
-                        <tbody id="members-table-body" class="divide-y divide-gray-100 p-4 md:p-0 block md:table-row-group"></tbody>
+                        <tbody id="members-table-body" class="divide-y divide-gray-100 p-3 md:p-0 block md:table-row-group"></tbody>
                     </table>
                 </div>
             </section>
@@ -258,18 +256,18 @@
                 </div>
 
                 <div class="space-y-6">
-                    <div class="bg-white md:rounded-3xl shadow-sm border border-gray-200 overflow-hidden -mx-4 md:mx-0">
+                    <div class="bg-white md:rounded-3xl shadow-sm border border-gray-200 overflow-hidden -mx-3 md:mx-0">
                         <div class="bg-gray-50 px-5 py-3 border-b font-bold text-sm text-gray-700 flex items-center gap-2"><i data-lucide="history" class="w-4 h-4"></i> Historial: Ejercicio</div>
                         <table class="w-full text-sm text-left mobile-card-table">
                             <thead class="bg-white text-gray-500 sticky top-0 border-b"><tr><th class="p-3">Fecha</th><th class="p-3">S1</th><th class="p-3">S2</th><th class="p-3">S3</th><th class="p-3">S4</th><th class="p-3 text-right">Acción</th></tr></thead>
-                            <tbody id="report-table-exercise" class="divide-y divide-gray-100 p-4 md:p-0 block md:table-row-group"></tbody>
+                            <tbody id="report-table-exercise" class="divide-y divide-gray-100 p-3 md:p-0 block md:table-row-group"></tbody>
                         </table>
                     </div>
-                    <div class="bg-white md:rounded-3xl shadow-sm border border-gray-200 overflow-hidden -mx-4 md:mx-0">
+                    <div class="bg-white md:rounded-3xl shadow-sm border border-gray-200 overflow-hidden -mx-3 md:mx-0">
                         <div class="bg-gray-50 px-5 py-3 border-b font-bold text-sm text-gray-700">Histórico Completo</div>
                         <table class="w-full text-sm text-left mobile-card-table">
                             <thead class="bg-white text-gray-500 sticky top-0 border-b"><tr><th class="p-3">Fecha</th><th class="p-3">Ejercicio</th><th class="p-3">Resumen</th><th class="p-3 text-right">Acción</th></tr></thead>
-                            <tbody id="report-table-all" class="divide-y divide-gray-100 p-4 md:p-0 block md:table-row-group"></tbody>
+                            <tbody id="report-table-all" class="divide-y divide-gray-100 p-3 md:p-0 block md:table-row-group"></tbody>
                         </table>
                     </div>
                 </div>
@@ -302,26 +300,34 @@
         </div>
     </nav>
 
-    <div id="modal-member" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-[60] backdrop-blur-sm px-4">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 transform transition-all scale-100">
-            <h3 id="modal-member-title" class="text-xl font-bold mb-6 text-gray-900 border-b pb-4">Nuevo Miembro</h3>
-            <form onsubmit="ONS.UI.Members.save(event)">
-                <input type="hidden" id="mem-userid">
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div><label class="block text-xs font-bold text-gray-700 mb-1 pl-1">Nombre</label><input type="text" id="mem-name" class="w-full border rounded-xl p-3 bg-gray-50 h-12" required></div>
-                    <div><label class="block text-xs font-bold text-gray-700 mb-1 pl-1">Apellido</label><input type="text" id="mem-lastname" class="w-full border rounded-xl p-3 bg-gray-50 h-12" required></div>
-                </div>
-                <div class="mb-4"><label class="block text-xs font-bold text-gray-700 mb-1 pl-1">Chalet</label><input type="text" id="mem-chalet" class="w-full border rounded-xl p-3 bg-gray-50 h-12" placeholder="Ej: 33" required></div>
-                <div class="mb-4"><label class="block text-xs font-bold text-gray-700 mb-1 pl-1">Email</label><input type="email" id="mem-email" class="w-full border rounded-xl p-3 bg-gray-50 h-12"></div>
-                <div class="mb-6"><label class="block text-xs font-bold text-gray-700 mb-1 pl-1">Contraseña</label><input type="password" id="mem-pass" class="w-full border rounded-xl p-3 bg-gray-50 h-12"></div>
-                <div id="cnt-isadmin" class="mb-6 flex items-center p-3 bg-gray-50 rounded-xl">
-                    <input type="checkbox" id="mem-isadmin" class="mr-3 h-6 w-6 rounded border-gray-300 text-blue-900 focus:ring-blue-900"><label for="mem-isadmin" class="text-sm text-gray-700 font-medium">Permisos de Administrador</label>
-                </div>
-                <div class="flex justify-end gap-3 pt-2">
-                    <button type="button" onclick="ONS.UI.Members.closeModal()" class="px-5 py-3 text-gray-600 hover:bg-gray-100 rounded-xl font-medium w-full">Cancelar</button>
-                    <button type="submit" class="px-5 py-3 bg-blue-900 text-white rounded-xl hover:bg-blue-800 font-bold shadow-md w-full">Guardar</button>
-                </div>
-            </form>
+    <div id="modal-member" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-[60] backdrop-blur-sm px-4 py-6">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col max-h-[90vh]">
+            <div class="p-6 pb-2 flex-shrink-0">
+                 <h3 id="modal-member-title" class="text-xl font-bold text-gray-900 border-b pb-4">Nuevo Miembro</h3>
+            </div>
+            
+            <div class="p-6 pt-0 overflow-y-auto">
+                <form onsubmit="ONS.UI.Members.save(event)" id="member-form">
+                    <input type="hidden" id="mem-userid">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div><label class="block text-xs font-bold text-gray-700 mb-1 pl-1">Nombre</label><input type="text" id="mem-name" class="w-full border rounded-xl p-3 bg-gray-50 h-12" required></div>
+                        <div><label class="block text-xs font-bold text-gray-700 mb-1 pl-1">Apellido</label><input type="text" id="mem-lastname" class="w-full border rounded-xl p-3 bg-gray-50 h-12" required></div>
+                    </div>
+                    <div class="mb-4"><label class="block text-xs font-bold text-gray-700 mb-1 pl-1">Chalet</label><input type="text" id="mem-chalet" class="w-full border rounded-xl p-3 bg-gray-50 h-12" placeholder="Ej: 33" required></div>
+                    <div class="mb-4"><label class="block text-xs font-bold text-gray-700 mb-1 pl-1">Email</label><input type="email" id="mem-email" class="w-full border rounded-xl p-3 bg-gray-50 h-12"></div>
+                    <div class="mb-4"><label class="block text-xs font-bold text-gray-700 mb-1 pl-1">Contraseña</label><input type="password" id="mem-pass" class="w-full border rounded-xl p-3 bg-gray-50 h-12"></div>
+                    <div class="mb-6"><label class="block text-xs font-bold text-gray-700 mb-1 pl-1">Confirmar Contraseña</label><input type="password" id="mem-pass-confirm" class="w-full border rounded-xl p-3 bg-gray-50 h-12" placeholder="Repite la contraseña"></div>
+                    
+                    <div id="cnt-isadmin" class="mb-6 flex items-center p-3 bg-gray-50 rounded-xl">
+                        <input type="checkbox" id="mem-isadmin" class="mr-3 h-6 w-6 rounded border-gray-300 text-blue-900 focus:ring-blue-900"><label for="mem-isadmin" class="text-sm text-gray-700 font-medium">Permisos de Administrador</label>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="p-4 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0 bg-white rounded-b-3xl">
+                <button type="button" onclick="ONS.UI.Members.closeModal()" class="px-5 py-3 text-gray-600 hover:bg-gray-100 rounded-xl font-medium w-full">Cancelar</button>
+                <button type="button" onclick="document.getElementById('member-form').requestSubmit()" class="px-5 py-3 bg-blue-900 text-white rounded-xl hover:bg-blue-800 font-bold shadow-md w-full">Guardar</button>
+            </div>
         </div>
     </div>
 
@@ -462,7 +468,6 @@
                         document.getElementById('mobile-nav').classList.remove('hidden');
                         
                         document.getElementById('header-user-badge').textContent = ONS.Auth.user.username;
-                        document.getElementById('mobile-user-badge').textContent = ONS.Auth.user.username;
 
                         if (ONS.Auth.isAdmin()) { 
                             document.getElementById('nav-btn-members').classList.remove('hidden'); 
@@ -508,7 +513,7 @@
                 },
                 formatDate(iso) { if(!iso) return ''; const d = new Date(iso); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear().toString().substr(-2)}`; },
                 Home: {
-                    populateSelector() { const sel = document.getElementById('exercise-select'); sel.innerHTML = '<option value="">Seleccionar...</option>'; [...new Set(ONS.Catalog.map(i=>i.group))].forEach(g => { const grp = document.createElement('optgroup'); grp.label = g; ONS.Catalog.filter(i=>i.group===g).forEach(ex => { const op = document.createElement('option'); op.value = ex.id; op.textContent = ex.name; grp.appendChild(op); }); sel.appendChild(grp); }); },
+                    populateSelector() { const sel = document.getElementById('exercise-select'); sel.innerHTML = '<option value="">Selecciona Ejercicio...</option>'; [...new Set(ONS.Catalog.map(i=>i.group))].forEach(g => { const grp = document.createElement('optgroup'); grp.label = g; ONS.Catalog.filter(i=>i.group===g).forEach(ex => { const op = document.createElement('option'); op.value = ex.id; op.textContent = ex.name; grp.appendChild(op); }); sel.appendChild(grp); }); },
                     initAdmin() {
                         const wrapper = document.getElementById('home-admin-mode');
                         const sel = document.getElementById('home-member-select');
@@ -522,9 +527,19 @@
                     updatePreview() {
                         const id = document.getElementById('exercise-select').value, card = document.getElementById('exercise-preview-card'), grid = document.getElementById('series-container');
                         if(!id) { card.classList.add('hidden'); grid.classList.add('hidden'); return; }
+                        
                         const ex = ONS.Catalog.find(i=>i.id===id);
-                        document.getElementById('preview-name').textContent = ex.name; document.getElementById('preview-notes').textContent = ex.notes; document.getElementById('preview-img').src = ex.img;
-                        card.classList.remove('hidden'); grid.classList.remove('hidden'); for(let i=1;i<=4;i++) { document.getElementById(`s${i}-kg`).value=''; document.getElementById(`s${i}-reps`).value=''; }
+                        document.getElementById('preview-name').textContent = ex.name; 
+                        document.getElementById('preview-notes').textContent = ex.notes; 
+                        
+                        // CORRECCIÓN IMAGEN: Asegurar que se ve
+                        const imgEl = document.getElementById('preview-img');
+                        imgEl.src = ex.img;
+                        imgEl.style.display = 'block'; // Forzar display
+
+                        card.classList.remove('hidden'); 
+                        grid.classList.remove('hidden'); 
+                        for(let i=1;i<=4;i++) { document.getElementById(`s${i}-kg`).value=''; document.getElementById(`s${i}-reps`).value=''; }
                     },
                     saveLog() {
                         const date = document.getElementById('session-date').value, exId = document.getElementById('exercise-select').value;
@@ -537,7 +552,7 @@
                         ONS.DataStore.upsertLog({ userId: targetUserId, date: date, exerciseId: ex.id, exerciseName: ex.name, grupoMuscular: ex.group, series: series });
                         const btn = document.querySelector('#series-container button'); 
                         const originalHTML = btn.innerHTML; 
-                        btn.innerHTML = '<i data-lucide="check" class="w-6 h-6"></i> ¡GUARDADO!';
+                        btn.innerHTML = '<i data-lucide="check" class="w-5 h-5"></i> ¡GUARDADO!';
                         btn.classList.replace('bg-blue-600', 'bg-green-600');
                         lucide.createIcons();
                         setTimeout(() => { 
@@ -557,19 +572,19 @@
                         if(logs.length === 0) { list.innerHTML = '<div class="text-center py-10 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50">Sin actividad hoy</div>'; return; }
                         
                         logs.forEach(l => {
-                            const ex = ONS.Catalog.find(i=>i.id === l.exerciseId) || { img: '' };
-                            const seriesHtml = l.series.map((s,i) => `<div class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-mono font-bold">S${i+1} <span class="text-black">${s.w}x${s.r}</span></div>`).join('');
+                            const ex = ONS.Catalog.find(i=>i.id === l.exerciseId) || { img: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYmZjMGM4IiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8+PHBhdGggZD0iTTEyIDh2NGwzIDMiLz48L3N2Zz4=' };
+                            const seriesHtml = l.series.map((s,i) => `<div class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">S${i+1} <span class="text-black">${s.w}x${s.r}</span></div>`).join('');
                             list.innerHTML += `
-                                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-start gap-4">
-                                    <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100 flex-shrink-0">
-                                        <img src="${ex.img}" class="w-8 h-8 object-contain" onerror="this.style.display='none'">
+                                <div class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm flex items-start gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100 flex-shrink-0 p-1">
+                                        <img src="${ex.img}" class="w-full h-full object-contain">
                                     </div>
                                     <div class="flex-grow min-w-0">
                                         <div class="flex justify-between items-start">
-                                            <div class="font-bold text-base text-gray-800 leading-tight">${l.exerciseName}</div>
+                                            <div class="font-bold text-sm text-gray-800 leading-tight">${l.exerciseName}</div>
                                             <button onclick="ONS.UI.Home.deleteLog('${l.logId}')" class="text-red-300 hover:text-red-500 -mt-1 -mr-1 p-2"><i data-lucide="x" class="w-4 h-4"></i></button>
                                         </div>
-                                        <div class="flex flex-wrap gap-2 mt-2">${seriesHtml}</div>
+                                        <div class="flex flex-wrap gap-1 mt-1">${seriesHtml}</div>
                                     </div>
                                 </div>`;
                         });
@@ -606,7 +621,16 @@
                     },
                     closeModal() { document.getElementById('modal-member').classList.add('hidden'); },
                     save(e) {
-                        e.preventDefault(); const uid = document.getElementById('mem-userid').value, isAdmin = document.getElementById('mem-isadmin').checked, data = { userId: uid || null, firstName: document.getElementById('mem-name').value, lastName: document.getElementById('mem-lastname').value, chalet: document.getElementById('mem-chalet').value, email: document.getElementById('mem-email').value, password: document.getElementById('mem-pass').value, role: isAdmin ? 'ADMIN' : 'USER' };
+                        e.preventDefault(); 
+                        const uid = document.getElementById('mem-userid').value, isAdmin = document.getElementById('mem-isadmin').checked;
+                        const p1 = document.getElementById('mem-pass').value;
+                        const p2 = document.getElementById('mem-pass-confirm').value;
+                        
+                        // Validar contraseñas
+                        if(p1 && p1 !== p2) return alert("Las contraseñas no coinciden.");
+                        
+                        const data = { userId: uid || null, firstName: document.getElementById('mem-name').value, lastName: document.getElementById('mem-lastname').value, chalet: document.getElementById('mem-chalet').value, email: document.getElementById('mem-email').value, password: p1, role: isAdmin ? 'ADMIN' : 'USER' };
+                        
                         if (!uid) { let base = (data.firstName + data.lastName.charAt(0)).replace(/\s/g,''), suffix = '_' + data.chalet.replace(/\s/g,''), cand = base + suffix, c = 2; while(ONS.DataStore.listUsers().some(u => u.username === cand)) { cand = base + c + suffix; c++; } data.username = cand; } else { if(!data.password) delete data.password; }
                         try { ONS.DataStore.upsertUser(data); this.closeModal(); if (!ONS.Auth.user) { alert(`¡Registrado!\nTu usuario es: ${data.username}`); const newUser = ONS.DataStore.findUser({ user: data.username, pass: data.password }); if (newUser) { ONS.Auth.user = newUser; ONS.UI.initApp(); } } else { if(ONS.Auth.isAdmin()) this.render(); } } catch(err) { alert(err.message); }
                     },
