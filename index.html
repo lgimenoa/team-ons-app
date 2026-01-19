@@ -13,6 +13,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -172,15 +175,6 @@
             <section id="view-admin" class="view-section hidden">
                 <h2 class="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">Administración</h2>
                 
-                <div class="bg-yellow-50 rounded-3xl border border-yellow-200 p-6 mb-6">
-                    <h3 class="font-bold text-yellow-900 mb-4 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5"></i> Copia de Seguridad</h3>
-                    <div class="flex flex-col gap-3">
-                        <button onclick="ONS.Backup.downloadJSON()" class="w-full bg-white text-yellow-900 px-5 py-4 rounded-xl text-sm border border-yellow-200 flex items-center justify-center gap-2 font-bold shadow-sm hover:bg-yellow-100 transition"><i data-lucide="download" class="w-5 h-5"></i> Descargar Datos</button>
-                        <label class="w-full bg-yellow-600 text-white px-5 py-4 rounded-xl text-sm flex items-center justify-center gap-2 cursor-pointer font-bold shadow hover:bg-yellow-700 transition"><i data-lucide="upload" class="w-5 h-5"></i> Restaurar Datos<input type="file" class="hidden" onchange="ONS.Backup.uploadJSON(this)"></label>
-                    </div>
-                    <p id="backup-status" class="text-center text-xs text-yellow-800/60 mt-3 font-medium"></p>
-                </div>
-
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                     <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm"><div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Miembros</div><div id="adm-stat-users" class="text-2xl font-bold text-blue-900 mt-1">0</div></div>
                     <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm"><div class="text-[10px] text-green-600 font-bold uppercase tracking-wider">Activos</div><div id="adm-stat-active" class="text-2xl font-bold text-green-900 mt-1">0</div></div>
@@ -217,8 +211,9 @@
 
                 <div class="mt-8 mb-20 p-6 bg-red-50 rounded-3xl border border-red-100 text-center">
                     <h3 class="text-red-900 font-bold mb-2 flex items-center justify-center gap-2"><i data-lucide="alert-triangle" class="w-5 h-5"></i> Zona de Peligro</h3>
-                    <p class="text-red-700/70 text-xs mb-4">Esta acción borrará TODOS los datos de este dispositivo. No se puede deshacer.</p>
+                    <p class="text-red-700/70 text-xs mb-4">Esta acción borrará TODOS los datos de la NUBE. No se puede deshacer.</p>
                     <button onclick="ONS.DataStore.factoryReset()" class="bg-red-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg active:scale-[0.98] transition hover:bg-red-700 w-full md:w-auto">⚠ RESET DE FÁBRICA</button>
+                    <button onclick="ONS.DataStore.migrateFromLocal()" class="mt-4 text-gray-400 text-xs underline block w-full">Migrar datos antiguos del navegador</button>
                 </div>
             </section>
 
@@ -418,7 +413,7 @@
                 getDaysInMonth(m, y) { return new Date(y, m, 0).getDate(); }
             },
             
-            // CATALOGO ACTUALIZADO V3.0
+            // CATALOGO DE EJERCICIOS
             Catalog: [
                 { id: "leg_sq_gob", name: "Goblet Squat (Sentadilla Copa)", group: "PIERNAS", equip: "Pesa Rusa o Mancuerna", img: "Sentadillas.png", notes: "Sujeta el peso pegado al pecho. Baja profundo." },
                 { id: "leg_dl_rom", name: "Peso Muerto Rumano", group: "PIERNAS", equip: "Mancuernas o Pesa Rusa", img: "Peso Muerto.png", notes: "Piernas semirrígidas. Baja el peso rozando las piernas hasta la espinilla." },
@@ -457,85 +452,167 @@
                 { id: "core_farm", name: "Paseo de Granjero", group: "CORE", equip: "Pesas Rusas", img: "Paso de Granjero.png", notes: "Camina con una pesa en cada mano (o solo una) sin inclinarte." }
             ],
             
+            // =================================================================
+            // NUEVO DATASTORE (FASE 2) - CONECTADO A FIREBASE
+            // =================================================================
             DataStore: {
-                KEY_USERS: 'ons_users', KEY_LOGS: 'ons_logs', KEY_META: 'ons_meta',
-                state: { users: [], logs: [], meta: { lastExportAt: null } },
+                state: { users: [], logs: [], meta: {} },
+                db: null,
+
                 init() {
-                    try {
-                        const u = localStorage.getItem(this.KEY_USERS), l = localStorage.getItem(this.KEY_LOGS), m = localStorage.getItem(this.KEY_META);
-                        this.state.users = u ? JSON.parse(u) : []; this.state.logs = l ? JSON.parse(l) : []; this.state.meta = m ? JSON.parse(m) : { lastExportAt: null };
-                    } catch (e) { console.error("DataStore Init Error:", e); this.state = { users: [], logs: [], meta: { lastExportAt: null } }; }
-                    if (this.state.users.length === 0) this.createBootstrapAdmin();
-                    this.migrateSchema();
+                    const firebaseConfig = {
+                        apiKey: "AIzaSyBt8CkEHBFzBiUSBT568ZPWpZX6b8JvJik",
+                        authDomain: "team-ons-app.firebaseapp.com",
+                        databaseURL: "https://team-ons-app-default-rtdb.europe-west1.firebasedatabase.app",
+                        projectId: "team-ons-app",
+                        storageBucket: "team-ons-app.firebasestorage.app",
+                        messagingSenderId: "491886440888",
+                        appId: "1:491886440888:web:672199e7665a2e36cb5f4d"
+                    };
+
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(firebaseConfig);
+                    } else {
+                        firebase.app();
+                    }
+                    this.db = firebase.database();
+                    this.listenToCloud();
                 },
-                migrateSchema() {
-                    let dirty = false;
-                    try {
-                        this.state.logs.forEach(l => {
-                            if (!l.createdAt) { l.createdAt = l.date + "T12:00:00.000Z"; dirty = true; }
-                            if (!l.updatedAt) { l.updatedAt = l.createdAt; dirty = true; }
-                            if (typeof l.deleted === 'undefined') { l.deleted = false; dirty = true; }
-                            if (!l.exerciseId) {
-                                const match = ONS.Catalog.find(c => c.name === l.exercise || c.name === l.exerciseName);
-                                l.exerciseId = match ? match.id : "legacy_unknown";
-                                l.exerciseName = match ? match.name : l.exercise;
-                                dirty = true;
-                            }
-                        });
-                        if (dirty) this.persist();
-                    } catch (e) { console.error("Migration Error:", e); }
+
+                listenToCloud() {
+                    this.db.ref('users').on('value', (snapshot) => {
+                        const data = snapshot.val();
+                        this.state.users = data ? Object.values(data) : [];
+                        if (this.state.users.length === 0) this.createBootstrapAdmin();
+                        if (document.getElementById('view-members') && !document.getElementById('view-members').classList.contains('hidden')) {
+                             ONS.UI.Members.render();
+                        }
+                    });
+
+                    this.db.ref('logs').on('value', (snapshot) => {
+                        const data = snapshot.val();
+                        this.state.logs = data ? Object.values(data) : [];
+                        if(document.getElementById('admChartMonth')) ONS.UI.Admin.render();
+                        if(document.getElementById('session-logs-list')) ONS.UI.Home.renderSessionLogs();
+                    });
                 },
-                persist() { try { localStorage.setItem(this.KEY_USERS, JSON.stringify(this.state.users)); localStorage.setItem(this.KEY_LOGS, JSON.stringify(this.state.logs)); localStorage.setItem(this.KEY_META, JSON.stringify(this.state.meta)); } catch (e) { console.error("DataStore Persist Error:", e); alert("Error guardando datos."); } },
-                createBootstrapAdmin() { this.state.users.push({ userId: ONS.Utils.uuid(), username: "LuisG_33", password: "admin", firstName: "Luis", lastName: "Gimeno", chalet: "33", role: "ADMIN", status: "ACTIVE", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); this.persist(); },
+
                 listUsers() { return this.state.users; },
-                findUser(creds) { const i = creds.user.trim().toLowerCase(); return this.state.users.find(u => (u.username.toLowerCase() === i || (u.firstName+u.lastName+u.chalet).replace(/\s/g,'').toLowerCase() === i.replace(/\s/g,'')) && u.password === creds.pass && u.status === 'ACTIVE'); },
-                upsertUser(u) {
-                    const now = new Date().toISOString();
-                    if (!u.userId) { if (this.state.users.some(x => x.username === u.username)) throw new Error("Username conflicto"); this.state.users.push({ ...u, userId: ONS.Utils.uuid(), status: 'ACTIVE', createdAt: now, updatedAt: now }); } 
-                    else { const idx = this.state.users.findIndex(x => x.userId === u.userId); if(idx >= 0) this.state.users[idx] = { ...this.state.users[idx], ...u, updatedAt: now }; }
-                    this.persist();
-                },
-                deleteUser(id, hard) { if (hard) { this.state.users = this.state.users.filter(u => u.userId !== id); this.state.logs = this.state.logs.filter(l => l.userId !== id); } else { const u = this.state.users.find(x => x.userId === id); if (u) { u.status = 'DESACTIVATED'; u.updatedAt = new Date().toISOString(); } } this.persist(); },
+                
                 listLogs(filters = {}) {
                     let res = this.state.logs.filter(l => !l.deleted);
                     if (filters.userId) res = res.filter(l => l.userId === filters.userId);
                     return res.sort((a,b) => new Date(b.date) - new Date(a.date));
                 },
-                upsertLog(l) { const now = new Date().toISOString(); if (!l.logId) { l.logId = ONS.Utils.uuid(); l.createdAt = now; l.updatedAt = now; l.deleted = false; this.state.logs.push(l); } else { const idx = this.state.logs.findIndex(x => x.logId === l.logId); if (idx >= 0) this.state.logs[idx] = { ...this.state.logs[idx], ...l, updatedAt: now }; } this.persist(); },
-                deleteLog(id) { const idx = this.state.logs.findIndex(x => x.logId === id); if (idx >= 0) { this.state.logs[idx].deleted = true; this.state.logs[idx].updatedAt = new Date().toISOString(); this.persist(); } },
+
+                findUser(creds) { 
+                    const i = creds.user.trim().toLowerCase(); 
+                    return this.state.users.find(u => (
+                        u.username.toLowerCase() === i || 
+                        (u.firstName+u.lastName+u.chalet).replace(/\s/g,'').toLowerCase() === i.replace(/\s/g,'')
+                    ) && u.password === creds.pass && u.status === 'ACTIVE'); 
+                },
+
+                upsertUser(u) {
+                    const now = new Date().toISOString();
+                    if (!u.userId) { 
+                        if (this.state.users.some(x => x.username === u.username)) throw new Error("El usuario ya existe"); 
+                        u.userId = ONS.Utils.uuid(); 
+                        u.status = 'ACTIVE'; 
+                        u.createdAt = now; 
+                        u.updatedAt = now;
+                    } else {
+                        const existing = this.state.users.find(x => x.userId === u.userId);
+                        u = { ...existing, ...u, updatedAt: now };
+                    }
+                    this.db.ref('users/' + u.userId).set(u)
+                        .catch(e => alert("Error guardando usuario: " + e.message));
+                },
+
+                deleteUser(id, hard) { 
+                    if (hard) { 
+                        this.db.ref('users/' + id).remove();
+                        const userLogs = this.state.logs.filter(l => l.userId === id);
+                        userLogs.forEach(l => this.db.ref('logs/' + l.logId).remove());
+                    } else { 
+                        const u = this.state.users.find(x => x.userId === id);
+                        if (u) { 
+                            u.status = 'DESACTIVATED'; 
+                            u.updatedAt = new Date().toISOString();
+                            this.db.ref('users/' + id).set(u);
+                        } 
+                    } 
+                },
+
+                upsertLog(l) { 
+                    const now = new Date().toISOString(); 
+                    if (!l.logId) { 
+                        l.logId = ONS.Utils.uuid(); 
+                        l.createdAt = now; 
+                        l.updatedAt = now; 
+                        l.deleted = false; 
+                    } else {
+                        l.updatedAt = now;
+                    }
+                    this.db.ref('logs/' + l.logId).set(l)
+                        .catch(e => alert("Error de conexión al guardar entreno."));
+                },
+
+                deleteLog(id) { 
+                    const l = this.state.logs.find(x => x.logId === id);
+                    if (l) {
+                        l.deleted = true;
+                        l.updatedAt = new Date().toISOString();
+                        this.db.ref('logs/' + id).set(l);
+                    }
+                },
+
+                createBootstrapAdmin() { 
+                    const admin = { 
+                        userId: ONS.Utils.uuid(), 
+                        username: "LuisG_33", 
+                        password: "admin", 
+                        firstName: "Luis", 
+                        lastName: "Gimeno", 
+                        chalet: "33", 
+                        role: "ADMIN", 
+                        status: "ACTIVE", 
+                        createdAt: new Date().toISOString(), 
+                        updatedAt: new Date().toISOString() 
+                    }; 
+                    this.upsertUser(admin);
+                },
                 
-                // RESET DE FÁBRICA
+                persist() { },
+                
                 factoryReset() {
-                    if(confirm("ATENCIÓN: ¿Estás seguro de que quieres borrar TODOS los datos de esta aplicación en este dispositivo?")) {
-                        if(confirm("Esta acción no se puede deshacer. ¿Borrar todo?")) {
-                            localStorage.clear();
-                            alert("Datos borrados. La aplicación se reiniciará.");
-                            window.location.reload();
+                    if(confirm("⚠ PELIGRO: Borrar TODO en la NUBE. ¿Seguro?")) {
+                        if(prompt("Escribe 'BORRAR' para confirmar:") === "BORRAR") {
+                            this.db.ref().remove().then(() => { alert("Reiniciado."); window.location.reload(); });
                         }
                     }
                 },
-                sync() {}
+                
+                migrateFromLocal() {
+                    const localUsers = JSON.parse(localStorage.getItem('ons_users') || '[]');
+                    const localLogs = JSON.parse(localStorage.getItem('ons_logs') || '[]');
+                    if(localUsers.length === 0 && localLogs.length === 0) return alert("No hay datos antiguos para migrar.");
+                    if(confirm(`¿Subir ${localUsers.length} usuarios y ${localLogs.length} logs locales a la nube?`)) {
+                        localUsers.forEach(u => this.db.ref('users/' + u.userId).set(u));
+                        localLogs.forEach(l => this.db.ref('logs/' + l.logId).set(l));
+                        alert("Migración completada. Ya puedes borrar el historial del navegador si quieres.");
+                    }
+                }
             },
+            
             Auth: {
                 user: null,
-                login(e) { e.preventDefault(); const u = ONS.DataStore.findUser({ user: document.getElementById('login-user').value, pass: document.getElementById('login-pass').value }); if (u) { this.user = u; ONS.UI.initApp(); } else alert("Credenciales inválidas"); },
+                login(e) { e.preventDefault(); const u = ONS.DataStore.findUser({ user: document.getElementById('login-user').value, pass: document.getElementById('login-pass').value }); if (u) { this.user = u; ONS.UI.initApp(); } else alert("Credenciales inválidas o cargando datos..."); },
                 logout() { window.location.reload(); },
                 isAdmin() { return this.user?.role === 'ADMIN'; }
             },
-            Backup: {
-                downloadJSON() {
-                    try {
-                        const lastExport = ONS.DataStore.state.meta.lastExportAt, logsToExport = ONS.DataStore.state.logs.filter(l => !lastExport || l.updatedAt > lastExport);
-                        const blob = new Blob([JSON.stringify({ meta: { exportedAt: new Date().toISOString() }, users: ONS.DataStore.state.users, logs: logsToExport }, null, 2)], { type: "application/json" });
-                        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `ONS_Backup_${new Date().toISOString().slice(0,10)}.json`; a.click();
-                        ONS.DataStore.state.meta.lastExportAt = new Date().toISOString(); ONS.DataStore.persist(); document.getElementById('backup-status').textContent = `Backup generado (${logsToExport.length} logs).`;
-                    } catch(e) { console.error("Backup Error:", e); alert("Error generando backup."); }
-                },
-                uploadJSON(input) {
-                    const file = input.files[0]; if (!file) return; const reader = new FileReader();
-                    reader.onload = e => { try { const data = JSON.parse(e.target.result); if (data.users && data.logs) { data.users.forEach(r => { const i = ONS.DataStore.state.users.findIndex(l => l.userId === r.userId); if (i === -1) ONS.DataStore.state.users.push(r); else if (r.updatedAt > ONS.DataStore.state.users[i].updatedAt) ONS.DataStore.state.users[i] = r; }); data.logs.forEach(r => { const i = ONS.DataStore.state.logs.findIndex(l => l.logId === r.logId); if (i === -1) ONS.DataStore.state.logs.push(r); else if (r.updatedAt > ONS.DataStore.state.logs[i].updatedAt) ONS.DataStore.state.logs[i] = r; }); ONS.DataStore.persist(); alert("Datos importados correctamente."); window.location.reload(); } else alert("JSON Inválido"); } catch(err) { alert("Error: " + err.message); } }; reader.readAsText(file);
-                }
-            },
+            
+            // EL RESTO DEL CÓDIGO (UI, CHARTS) SE MANTIENE IGUAL
             UI: {
                 charts: {},
                 initApp() {
@@ -626,7 +703,6 @@
                         wrapper.classList.remove('hidden');
                         sel.innerHTML = '';
                         const myself = document.createElement('option'); myself.value = ONS.Auth.user.userId; myself.textContent = "Mí mismo"; sel.appendChild(myself);
-                        // ORDENADO POR NOMBRE
                         ONS.DataStore.listUsers().filter(u => u.status === 'ACTIVE' && u.userId !== ONS.Auth.user.userId)
                             .sort((a,b) => a.firstName.localeCompare(b.firstName))
                             .forEach(u => {
@@ -703,7 +779,6 @@
                 Members: {
                     render() {
                         const tb = document.getElementById('members-table-body'); tb.innerHTML = '';
-                        // ORDENADO POR NOMBRE
                         ONS.DataStore.listUsers().filter(u=>u.status!=='DESACTIVATED')
                             .sort((a,b) => a.firstName.localeCompare(b.firstName))
                             .forEach(u => {
@@ -762,7 +837,6 @@
                             const today = new Date();
                             const currMonthKey = ONS.Utils.fmtMonth(today);
                             
-                            // CALCULOS VOLUMEN (LOGS)
                             const monMap = {};
                             const dayMap = {};
                             logs.forEach(l => { 
@@ -772,21 +846,16 @@
                                 if(l.date.startsWith(currMonthKey)) dayMap[l.date] = (dayMap[l.date]||0)+1;
                             });
                             
-                            // CALCULOS ASISTENCIA (SESIONES UNICAS)
-                            const attendMonth = {}; // Key: Month, Value: Set of User|Date
-                            const attendDay = {}; // Key: Date, Value: Set of User
+                            const attendMonth = {};
+                            const attendDay = {};
                             logs.forEach(l => {
                                 if(!l.date) return;
                                 const mKey = l.date.substring(0,7);
                                 const sessionKey = `${l.userId}|${l.date}`;
-                                
-                                // History Month
                                 if (mKey !== currMonthKey) {
                                     if(!attendMonth[mKey]) attendMonth[mKey] = new Set();
                                     attendMonth[mKey].add(sessionKey);
                                 }
-                                
-                                // Current Month Day
                                 if(l.date.startsWith(currMonthKey)) {
                                     if(!attendDay[l.date]) attendDay[l.date] = new Set();
                                     attendDay[l.date].add(l.userId);
@@ -798,7 +867,6 @@
                             const daysInMonth = ONS.Utils.getDaysInMonth(today.getMonth()+1, today.getFullYear());
                             const dayKeys = Array.from({length: daysInMonth}, (_, i) => `${currMonthKey}-${String(i+1).padStart(2,'0')}`);
                             
-                            // RENDER CHARTS
                             this.drawChart('admChartMonth', 'bar', monKeys, monKeys.map(k=>monMap[k]), 'Registros Totales');
                             this.drawChart('admChartDay', 'line', dayKeys.map(k=>k.slice(-2)), dayKeys.map(k=>dayMap[k]||0), 'Registros Diarios');
                             
