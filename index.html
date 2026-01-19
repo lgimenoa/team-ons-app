@@ -32,14 +32,13 @@
             overscroll-behavior-y: none; 
             -webkit-tap-highlight-color: transparent;
         }
-        /* Ajustes para inputs en móvil (evita zoom en iOS) */
+        /* Ajustes para inputs en móvil */
         input, select, textarea { font-size: 16px !important; }
         
-        /* Ocultar barra de scroll pero permitir deslizamiento */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .view-section { transition: opacity 0.2s ease-in-out; padding-bottom: 120px; } /* Espacio extra abajo para el menú móvil */
+        .view-section { transition: opacity 0.2s ease-in-out; padding-bottom: 120px; }
         
         .fade-in { animation: fadeIn 0.3s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -49,7 +48,6 @@
         .chart-container-sm { position: relative; height: 200px; width: 100%; }
         .chart-container-md { position: relative; height: 250px; width: 100%; }
 
-        /* Estilos específicos para transformar tablas en tarjetas */
         @media (max-width: 768px) {
             .mobile-card-table thead { display: none; }
             .mobile-card-table tr { display: block; background: white; margin-bottom: 1rem; border-radius: 1rem; border: 1px solid #e5e7eb; padding: 1rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
@@ -136,19 +134,16 @@
                         </div>
 
                         <div id="series-container" class="hidden">
-                            <div class="grid grid-cols-4 gap-2 mb-2 text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                <div>S1</div> <div>S2</div> <div>S3</div> <div>S4</div>
-                            </div>
-                            <div class="grid grid-cols-4 gap-3 mb-24 md:mb-6"> <div class="space-y-2"><input type="number" id="s1-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-lg font-bold"><input type="number" id="s1-reps" placeholder="Rps" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm bg-gray-50 text-lg"></div>
+                            <div class="grid grid-cols-4 gap-2 mb-2 text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest"><div>S1</div> <div>S2</div> <div>S3</div> <div>S4</div></div>
+                            <div class="grid grid-cols-4 gap-3 mb-24 md:mb-6">
+                                <div class="space-y-2"><input type="number" id="s1-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-lg font-bold"><input type="number" id="s1-reps" placeholder="Rps" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm bg-gray-50 text-lg"></div>
                                 <div class="space-y-2"><input type="number" id="s2-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm text-lg font-bold"><input type="number" id="s2-reps" placeholder="Rps" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm bg-gray-50 text-lg"></div>
                                 <div class="space-y-2"><input type="number" id="s3-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm text-lg font-bold"><input type="number" id="s3-reps" placeholder="Rps" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm bg-gray-50 text-lg"></div>
                                 <div class="space-y-2"><input type="number" id="s4-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm text-lg font-bold"><input type="number" id="s4-reps" placeholder="Rps" inputmode="decimal" class="w-full h-12 border-gray-200 border rounded-xl text-center shadow-sm bg-gray-50 text-lg"></div>
                             </div>
-
                             <div class="fixed bottom-[85px] left-0 right-0 px-4 md:static md:p-0 z-20">
                                 <button onclick="ONS.UI.Home.saveLog()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-xl active:scale-[0.98] transition-transform flex items-center justify-center gap-2 text-lg border border-blue-500/50 backdrop-blur-sm">
-                                    <i data-lucide="check-circle" class="w-6 h-6"></i> 
-                                    <span>Guardar Serie</span>
+                                    <i data-lucide="check-circle" class="w-6 h-6"></i> <span>Guardar Serie</span>
                                 </button>
                             </div>
                         </div>
@@ -177,7 +172,6 @@
 
             <section id="view-admin" class="view-section hidden">
                 <h2 class="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">Administración</h2>
-                
                 <div class="bg-yellow-50 rounded-3xl border border-yellow-200 p-6 mb-6">
                     <h3 class="font-bold text-yellow-900 mb-4 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5"></i> Copia de Seguridad</h3>
                     <div class="flex flex-col gap-3">
@@ -186,13 +180,11 @@
                     </div>
                     <p id="backup-status" class="text-center text-xs text-yellow-800/60 mt-3 font-medium"></p>
                 </div>
-
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                     <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm"><div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Miembros</div><div id="adm-stat-users" class="text-2xl font-bold text-blue-900 mt-1">0</div></div>
                     <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm"><div class="text-[10px] text-green-600 font-bold uppercase tracking-wider">Activos</div><div id="adm-stat-active" class="text-2xl font-bold text-green-900 mt-1">0</div></div>
                     <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm col-span-2 md:col-span-1"><div class="text-[10px] text-purple-600 font-bold uppercase tracking-wider">Registros Totales</div><div id="adm-stat-logs" class="text-2xl font-bold text-purple-900 mt-1">0</div></div>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
                     <div class="bg-white p-4 rounded-3xl border border-gray-200 shadow-sm"><h4 class="text-sm font-bold text-gray-700 mb-3 ml-2">Por Mes</h4><div class="chart-container-sm"><canvas id="admChartMonth"></canvas></div></div>
                     <div class="bg-white p-4 rounded-3xl border border-gray-200 shadow-sm"><h4 class="text-sm font-bold text-gray-700 mb-3 ml-2">Por Día</h4><div class="chart-container-sm"><canvas id="admChartDay"></canvas></div></div>
@@ -222,7 +214,30 @@
 
                 <div class="bg-white rounded-3xl border border-gray-200 p-5 mb-6 shadow-sm">
                     <h3 class="font-bold text-gray-800 mb-4 text-sm flex items-center gap-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-600"></i> Asistencia</h3>
-                    <div class="chart-container-sm"><canvas id="repChartAttendMonth"></canvas></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-2">Por Mes (Histórico)</h4>
+                            <div class="chart-container-sm"><canvas id="repChartAttendMonth"></canvas></div>
+                        </div>
+                        <div class="border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-2">Días este Mes</h4>
+                            <div class="chart-container-sm"><canvas id="repChartAttendDay"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl border border-gray-200 p-5 mb-6 shadow-sm">
+                    <h3 class="font-bold text-gray-800 mb-4 text-sm flex items-center gap-2"><i data-lucide="activity" class="w-4 h-4 text-purple-600"></i> Volumen de Actividad</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-2">Registros por Mes</h4>
+                            <div class="chart-container-sm"><canvas id="repChartVolMonth"></canvas></div>
+                        </div>
+                        <div class="border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase mb-2">Registros este Mes</h4>
+                            <div class="chart-container-sm"><canvas id="repChartVolDay"></canvas></div>
+                        </div>
+                    </div>
                 </div>
 
                 <h3 class="font-bold text-gray-800 mb-3 mt-8 px-1">Evolución por Ejercicio</h3>
@@ -250,7 +265,6 @@
                             <tbody id="report-table-exercise" class="divide-y divide-gray-100 p-4 md:p-0 block md:table-row-group"></tbody>
                         </table>
                     </div>
-                    
                     <div class="bg-white md:rounded-3xl shadow-sm border border-gray-200 overflow-hidden -mx-4 md:mx-0">
                         <div class="bg-gray-50 px-5 py-3 border-b font-bold text-sm text-gray-700">Histórico Completo</div>
                         <table class="w-full text-sm text-left mobile-card-table">
@@ -261,6 +275,7 @@
                 </div>
             </section>
         </div>
+        
         <div class="max-w-md mx-auto px-6 pb-40 text-center">
              <button onclick="generateDummyData()" class="text-[10px] text-gray-300 font-bold border border-gray-200 p-2 rounded hover:text-blue-500 hover:border-blue-500">🛠 GENERAR DATOS DE PRUEBA</button>
         </div>
@@ -374,7 +389,6 @@
                 { id: "core_farm", name: "Paseo Granjero", group: "CORE", equip: "Pesas", img: "Paso de Granjero.png", notes: "Caminar estable." }
             ],
             
-            // DATASTORE (Lógica Sagrada No-Modificada)
             DataStore: {
                 KEY_USERS: 'ons_users', KEY_LOGS: 'ons_logs', KEY_META: 'ons_meta',
                 state: { users: [], logs: [], meta: { lastExportAt: null } },
@@ -449,17 +463,14 @@
                     try {
                         document.getElementById('view-login').classList.add('hidden'); 
                         document.getElementById('main-header').classList.remove('hidden'); 
-                        document.getElementById('mobile-nav').classList.remove('hidden'); // Mostrar nav móvil
+                        document.getElementById('mobile-nav').classList.remove('hidden');
                         
                         document.getElementById('header-user-badge').textContent = ONS.Auth.user.username;
                         document.getElementById('mobile-user-badge').textContent = ONS.Auth.user.username;
 
                         if (ONS.Auth.isAdmin()) { 
-                            // Desktop
                             document.getElementById('nav-btn-members').classList.remove('hidden'); 
                             document.getElementById('nav-btn-admin').classList.remove('hidden'); 
-                            
-                            // Mobile
                             document.getElementById('mob-nav-admin').classList.remove('hidden');
                             
                             this.Members.render();
@@ -470,17 +481,14 @@
                 },
                 navigateTo(id) {
                     try {
-                        // Ocultar todas las secciones
                         document.querySelectorAll('.view-section').forEach(e => e.classList.add('hidden')); 
                         document.getElementById(`view-${id}`).classList.remove('hidden'); 
-                        document.getElementById('profile-menu-mob').classList.add('hidden'); // Cerrar menú perfil si abierto
+                        document.getElementById('profile-menu-mob').classList.add('hidden');
 
-                        // Reset Desktop Nav
                         document.querySelectorAll('.nav-btn').forEach(btn => { btn.classList.remove('bg-blue-700', 'text-white', 'font-bold', 'shadow-inner'); btn.classList.add('text-blue-100'); });
                         const btn = document.getElementById(`nav-btn-${id}`); 
                         if(btn) { btn.classList.remove('text-blue-100'); btn.classList.add('bg-blue-700', 'text-white', 'font-bold', 'shadow-inner'); }
                         
-                        // Reset Mobile Nav Colors
                         const mobIds = ['home','reports','admin'];
                         mobIds.forEach(m => {
                             const mBtn = document.getElementById(`mob-nav-${m}`);
@@ -488,14 +496,12 @@
                             if(mBtn) mBtn.classList.add('text-gray-400');
                         });
 
-                        // Set Active Mobile
                         const activeMob = document.getElementById(`mob-nav-${id}`);
                         if(activeMob) {
                             activeMob.classList.remove('text-gray-400');
                             activeMob.classList.add(id === 'admin' ? 'text-yellow-600' : 'text-blue-600');
                         }
 
-                        // Scroll to top
                         document.getElementById('main-container').scrollTop = 0;
 
                         if(id === 'home') this.Home.renderSessionLogs(); 
@@ -533,7 +539,6 @@
                         if(series.length===0) return alert("Registra al menos una serie");
                         const ex = ONS.Catalog.find(i=>i.id===exId);
                         ONS.DataStore.upsertLog({ userId: targetUserId, date: date, exerciseId: ex.id, exerciseName: ex.name, grupoMuscular: ex.group, series: series });
-                        // Feedback Visual
                         const btn = document.querySelector('#series-container button'); 
                         const originalHTML = btn.innerHTML; 
                         btn.innerHTML = '<i data-lucide="check" class="w-6 h-6"></i> ¡GUARDADO!';
@@ -555,7 +560,6 @@
                         const logs = ONS.DataStore.listLogs({ userId: targetUserId }).filter(l => l.date === date);
                         if(logs.length === 0) { list.innerHTML = '<div class="text-center py-10 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50">Sin actividad hoy</div>'; return; }
                         
-                        // Diseño actualizado para que sea responsivo y limpio
                         logs.forEach(l => {
                             const ex = ONS.Catalog.find(i=>i.id === l.exerciseId) || { img: '' };
                             const seriesHtml = l.series.map((s,i) => `<div class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-mono font-bold">S${i+1} <span class="text-black">${s.w}x${s.r}</span></div>`).join('');
@@ -581,7 +585,6 @@
                     render() {
                         const tb = document.getElementById('members-table-body'); tb.innerHTML = '';
                         ONS.DataStore.listUsers().filter(u=>u.status!=='DESACTIVATED').forEach(u => {
-                            // HTML adaptado para Cards en Mobile usando data-label
                             tb.innerHTML += `
                             <tr class="hover:bg-gray-50 border-b last:border-0 md:border-b-0">
                                 <td class="p-4 font-mono" data-label="Chalet">${u.chalet}</td>
@@ -613,34 +616,6 @@
                     },
                     delete(id) { if(confirm("¿Dar de baja?")) { ONS.DataStore.deleteUser(id, confirm("¿Borrar historial también?")); this.render(); } }
                 },
-                Admin: {
-                    render() {
-                        const users = ONS.DataStore.listUsers(), logs = ONS.DataStore.state.logs.filter(l => !l.deleted);
-                        document.getElementById('adm-stat-users').textContent = users.length;
-                        document.getElementById('adm-stat-logs').textContent = logs.length;
-                        const activeThreshold = new Date(); activeThreshold.setDate(activeThreshold.getDate() - 30);
-                        const activeUsers = users.filter(u => logs.some(l => l.userId === u.userId && new Date(l.date) > activeThreshold)).length;
-                        document.getElementById('adm-stat-active').textContent = activeUsers;
-                        const today = new Date(), currMonthKey = ONS.Utils.fmtMonth(today);
-                        const monMap = {};
-                        logs.forEach(l => { const k = l.date.substring(0,7); if(k !== currMonthKey) monMap[k] = (monMap[k]||0)+1; });
-                        const monKeys = Object.keys(monMap).sort();
-                        const dayMap = {};
-                        logs.forEach(l => { if(l.date.startsWith(currMonthKey)) dayMap[l.date] = (dayMap[l.date]||0)+1; });
-                        const daysInMonth = ONS.Utils.getDaysInMonth(today.getMonth()+1, today.getFullYear());
-                        const dayKeys = Array.from({length: daysInMonth}, (_, i) => `${currMonthKey}-${String(i+1).padStart(2,'0')}`);
-                        this.drawChart('admChartMonth', 'bar', monKeys, monKeys.map(k=>monMap[k]), 'Actividad Mensual');
-                        this.drawChart('admChartDay', 'line', dayKeys.map(k=>k.slice(-2)), dayKeys.map(k=>dayMap[k]||0), 'Actividad Diaria');
-                    },
-                    drawChart(id, type, labels, data, label) {
-                        try {
-                            const cv = document.getElementById(id); if(!cv) return;
-                            if (ONS.UI.charts[id]) ONS.UI.charts[id].destroy();
-                            const ctx = cv.getContext('2d');
-                            ONS.UI.charts[id] = new Chart(ctx, { type: type, data: { labels: labels, datasets: [{ label: label, data: data, backgroundColor: 'rgba(59, 130, 246, 0.5)', borderColor: '#2563eb', borderWidth: 1, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
-                        } catch(e) { console.error("Admin Chart Error:", e); }
-                    }
-                },
                 Reports: {
                     init() {
                         try {
@@ -669,22 +644,23 @@
                         const histKeys = Object.keys(volMonth).sort();
                         const daysInMonth = ONS.Utils.getDaysInMonth(today.getMonth()+1, today.getFullYear());
                         const currKeys = Array.from({length: daysInMonth}, (_, i) => `${currMonthKey}-${String(i+1).padStart(2,'0')}`);
+                        
+                        // CORRECCIÓN: Reactivados TODOS los gráficos
                         this.drawChart('repChartAttendMonth', 'bar', histKeys, histKeys.map(k=>attendMonth[k]?attendMonth[k].size:0), 'Días');
-                        // this.drawChart('repChartAttendDay', 'line', currKeys.map(k=>k.slice(-2)), currKeys.map(k=>attendDay[k]||0), 'Asistencia'); // Removed for UI simplicity
-                        // this.drawChart('repChartVolMonth', 'bar', histKeys, histKeys.map(k=>volMonth[k]||0), 'Registros');
-                        // this.drawChart('repChartVolDay', 'line', currKeys.map(k=>k.slice(-2)), currKeys.map(k=>volDay[k]||0), 'Registros');
+                        this.drawChart('repChartAttendDay', 'line', currKeys.map(k=>k.slice(-2)), currKeys.map(k=>attendDay[k]||0), 'Asistencia');
+                        this.drawChart('repChartVolMonth', 'bar', histKeys, histKeys.map(k=>volMonth[k]||0), 'Registros');
+                        this.drawChart('repChartVolDay', 'line', currKeys.map(k=>k.slice(-2)), currKeys.map(k=>volDay[k]||0), 'Registros');
+                        
                         let totalSets = 0, totalReps = 0, maxLoad = 0; exLogs.forEach(l => { totalSets += l.series.length; l.series.forEach(s => { totalReps += s.r; if(s.w > maxLoad) maxLoad = s.w; }); });
                         const chartLogs = [...exLogs].reverse(), labels = chartLogs.map(l => ONS.UI.formatDate(l.date)), data = chartLogs.map(l => { if (metric === 'max') return Math.max(...l.series.map(s => s.w)); if (metric === 'vol') return l.series.reduce((a,b) => a + b.r, 0); if (metric === 'ton') return l.series.reduce((a,b) => a + (b.w * b.r), 0); });
                         this.drawChart('evolutionChart', 'line', labels, data, metric);
                         
-                        // TABLA EJERCICIO ADAPTADA A CARDS
                         const tbEx = document.getElementById('report-table-exercise'); tbEx.innerHTML = '';
                         exLogs.forEach(l => { 
                             let seriesCells = ''; for(let i=0;i<4;i++) { seriesCells += `<td class="p-3 text-gray-600" data-label="Serie ${i+1}">${l.series[i] ? `${l.series[i].w}x${l.series[i].r}` : '-'}</td>`; } 
                             tbEx.innerHTML += `<tr class="border-b last:border-0 md:border-b hover:bg-gray-50"><td class="p-3 font-medium text-blue-900" data-label="Fecha">${ONS.UI.formatDate(l.date)}</td>${seriesCells}<td class="p-3 text-right" data-label="Acciones"><div class="flex justify-end gap-2"><button onclick="ONS.UI.Reports.editLog('${l.logId}')" class="text-blue-600 hover:text-blue-800 bg-blue-50 p-2 rounded-lg"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="ONS.UI.Reports.deleteLog('${l.logId}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded-lg ml-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`; 
                         });
                         
-                        // TABLA GENERAL ADAPTADA A CARDS
                         const tbAll = document.getElementById('report-table-all'); tbAll.innerHTML = '';
                         logs.forEach(l => { const summary = l.series.map(s => `${s.w}x${s.r}`).join(', '); tbAll.innerHTML += `<tr class="border-b last:border-0 md:border-b hover:bg-gray-50"><td class="p-3" data-label="Fecha">${ONS.UI.formatDate(l.date)}</td><td class="p-3 font-bold text-xs text-blue-900 uppercase" data-label="Ejercicio">${l.exerciseName}</td><td class="p-3 text-gray-500 font-mono text-xs" data-label="Series">${summary}</td><td class="p-3 text-right" data-label="Acciones"><div class="flex justify-end gap-2"><button onclick="ONS.UI.Reports.editLog('${l.logId}')" class="text-blue-600 bg-blue-50 p-2 rounded-lg"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="ONS.UI.Reports.deleteLog('${l.logId}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded-lg ml-2"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`; });
                         lucide.createIcons();
@@ -714,35 +690,27 @@
             Init() { try { ONS.DataStore.init(); lucide.createIcons(); const d = document.createElement('input'); d.setAttribute('type','date'); if (d.type != 'date') alert("Navegador antiguo. Usa Chrome/Safari."); } catch(e) { alert("Error crítico: " + e.message); } }
         };
         
-        // SCRIPT GENERADOR DE DATOS DE PRUEBA (SOLO PARA DESARROLLO)
         function generateDummyData() {
             if(!confirm("Esto generará 5 usuarios y muchos datos de prueba. ¿Continuar?")) return;
             const names = ["Carlos", "Ana", "Miguel", "Lucia", "David"];
             const exIds = ["push_bp_flat", "leg_sq_gob", "pull_lat", "sh_press", "arm_curl"];
             const users = [];
-
-            // 1. Crear Usuarios
             names.forEach((n, i) => {
                 const uid = ONS.Utils.uuid();
                 const u = { userId: uid, username: n + "_test", password: "123", firstName: n, lastName: "Test", chalet: (100+i).toString(), role: "USER", status: "ACTIVE", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
                 ONS.DataStore.state.users.push(u);
                 users.push(uid);
             });
-
-            // 2. Crear Logs (Últimos 30 días)
             const today = new Date();
             users.forEach(uid => {
-                for (let d = 0; d < 15; d++) { // 15 sesiones por usuario
+                for (let d = 0; d < 15; d++) {
                     const dateObj = new Date();
                     dateObj.setDate(today.getDate() - (Math.floor(Math.random() * 30)));
                     const dateStr = dateObj.toISOString().split('T')[0];
-                    
-                    // 3 ejercicios por sesión
                     for (let e = 0; e < 3; e++) {
                         const exCatalog = ONS.Catalog.find(c => c.id === exIds[Math.floor(Math.random() * exIds.length)]);
                         const series = [];
                         for(let s=0; s<3; s++) series.push({ w: Math.floor(Math.random()*40)+10, r: Math.floor(Math.random()*5)+8 });
-                        
                         ONS.DataStore.state.logs.push({
                             logId: ONS.Utils.uuid(),
                             userId: uid,
