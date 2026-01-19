@@ -14,320 +14,377 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* FIX IOS SCROLL & HEIGHT */
+        /* BASE IOS & RESET */
+        :root { --app-height: 100dvh; }
         html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden; /* El body no scrollea, lo hace el main */
+            height: 100%; width: 100%;
+            overflow: hidden; /* Scroll gestionado por contenedores internos */
             background-color: #f2f2f7;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            -webkit-text-size-adjust: 100%;
         }
 
-        /* CONTENEDOR APP (FLEX COL) */
-        #app-container {
-            display: flex;
-            flex-direction: column;
-            height: 100dvh; /* Altura dinámica real */
-            width: 100%;
+        /* LAYOUT PRINCIPAL */
+        #app-wrapper {
+            display: flex; flex-direction: column;
+            height: var(--app-height); width: 100%;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* AREA DE CONTENIDO (SCROLL) */
+        #main-content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+            padding-bottom: 90px; /* Espacio para navbar */
+        }
+
+        /* VISTAS */
+        .view-section { display: none; padding: 16px; animation: fadeIn 0.25s ease-out; }
+        .view-section.active { display: block; }
+
+        /* INPUTS MEJORADOS (NO ZOOM) */
+        input, select, textarea { 
+            font-size: 17px !important; 
+            border-radius: 12px;
+        }
+        
+        /* CARD ESTILO IOS */
+        .ios-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0,0,0,0.05);
             overflow: hidden;
         }
 
-        /* AREA SCROLLABLE */
-        #main-scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch; /* Scroll suave iOS */
-            padding-bottom: 100px; /* Espacio para el menú inferior */
-            padding-top: 10px;
-        }
+        /* ANIMACIONES */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        /* SAFE AREAS */
-        .safe-pt { padding-top: max(env(safe-area-inset-top), 20px); }
-        .safe-pb { padding-bottom: max(env(safe-area-inset-bottom), 20px); }
-
-        /* NO ZOOM INPUTS */
-        input, select, textarea { font-size: 16px !important; }
-
-        /* UTILIDADES VISIBILIDAD */
+        /* UTILS */
         .hidden-force { display: none !important; }
-        
-        /* Ocultar flechas numéricas */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
         /* NAV ITEM */
-        .nav-item { transition: color 0.2s; }
-        .nav-item.active { color: #2563eb; }
+        .nav-item { color: #9ca3af; transition: all 0.2s; }
+        .nav-item.active { color: #2563eb; transform: scale(1.05); }
         .nav-item.active svg { stroke: #2563eb; fill: #dbeafe; }
+        
+        /* SCROLL MODAL FIX */
+        .modal-body { max-height: 70vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     </style>
 </head>
 <body class="text-gray-900">
 
-    <div id="login-container" class="fixed inset-0 z-50 bg-gray-100 flex flex-col items-center justify-center p-6 h-[100dvh] w-full overflow-y-auto">
-        <div class="w-full max-w-sm bg-white rounded-3xl shadow-xl p-8 border border-gray-200">
+    <div id="login-container" class="fixed inset-0 z-[100] bg-gray-50 flex flex-col items-center justify-center p-6 h-[100dvh] w-full overflow-y-auto">
+        <div class="w-full max-w-sm bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
             <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-700 mb-4 shadow-sm">
-                    <i data-lucide="dumbbell" class="w-8 h-8"></i>
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-600 text-white mb-4 shadow-lg shadow-blue-200">
+                    <i data-lucide="dumbbell" class="w-10 h-10"></i>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-900">Team ONS</h1>
-                <p class="text-gray-500 text-sm">Entrenamiento v5.2</p>
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Team ONS</h1>
+                <p class="text-gray-500 font-medium">Entrenamiento v5.3</p>
             </div>
-            <form id="login-form" onsubmit="ONS.Auth.login(event)" class="space-y-4">
-                <input type="text" id="login-user" class="w-full h-14 bg-gray-50 border border-gray-300 rounded-2xl px-4 text-lg outline-none focus:border-blue-500 transition" placeholder="Usuario" required autocapitalize="none">
-                <input type="password" id="login-pass" class="w-full h-14 bg-gray-50 border border-gray-300 rounded-2xl px-4 text-lg outline-none focus:border-blue-500 transition" placeholder="Contraseña" required>
-                <button type="submit" class="w-full h-14 bg-blue-600 text-white font-bold rounded-2xl shadow-lg active:scale-95 transition text-lg mt-2">Iniciar Sesión</button>
+            <form id="login-form" onsubmit="ONS.Auth.login(event)" class="space-y-5">
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-400 uppercase ml-1">Usuario</label>
+                    <input type="text" id="login-user" class="w-full h-14 bg-gray-50 border border-gray-200 px-4 text-lg font-medium outline-none focus:border-blue-500 focus:bg-white transition" placeholder="Ej: LuisG_33" required autocapitalize="none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-gray-400 uppercase ml-1">Contraseña</label>
+                    <input type="password" id="login-pass" class="w-full h-14 bg-gray-50 border border-gray-200 px-4 text-lg font-medium outline-none focus:border-blue-500 focus:bg-white transition" required>
+                </div>
+                <button type="submit" class="w-full h-14 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition text-lg mt-4">Iniciar Sesión</button>
             </form>
-            <div class="mt-8 text-center pt-6 border-t border-gray-100">
-                <button onclick="ONS.UI.Members.openPublicRegister()" class="text-blue-600 font-bold text-sm">¿No tienes cuenta? Regístrate</button>
+            <div class="mt-8 text-center">
+                <button onclick="ONS.UI.Members.openPublicRegister()" class="text-blue-600 font-bold text-sm py-2 px-4 rounded-lg hover:bg-blue-50">Crear cuenta nueva</button>
             </div>
         </div>
     </div>
 
-    <div id="app-container" class="hidden-force">
+    <div id="app-wrapper" class="hidden-force">
         
-        <header class="bg-white/95 backdrop-blur shadow-sm border-b border-gray-200 flex-shrink-0 safe-pt z-20">
-            <div class="h-14 px-4 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="font-bold text-xl tracking-tight text-blue-900">Team ONS</span>
-                    <span id="header-user-badge" class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold uppercase"></span>
-                </div>
-                <button onclick="ONS.Auth.logout()" class="p-2 bg-gray-100 rounded-full text-gray-500 hover:text-red-500">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                </button>
+        <header class="bg-white/90 backdrop-blur border-b border-gray-200 h-14 flex items-center justify-between px-4 shrink-0 z-20">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-xl tracking-tight text-blue-900">Team ONS</span>
+                <span id="header-user-badge" class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-wide"></span>
             </div>
+            <button onclick="ONS.Auth.logout()" class="p-2 bg-gray-50 rounded-full text-gray-400 hover:text-red-500 transition">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+            </button>
         </header>
 
-        <div id="main-scroll-area">
-            <div class="max-w-2xl mx-auto px-4">
-
-                <section id="view-home" class="view-section pt-4">
-                    <div class="flex gap-2 mb-4">
-                        <input type="date" id="session-date" onchange="ONS.UI.Home.renderSessionLogs()" class="flex-grow h-12 bg-white border border-gray-200 rounded-xl px-3 text-center font-bold shadow-sm outline-none">
-                        
-                        <div id="home-admin-wrapper" class="hidden relative w-1/2">
-                            <select id="home-member-select" onchange="ONS.UI.Home.renderSessionLogs()" class="w-full h-12 bg-yellow-50 border border-yellow-200 rounded-xl px-2 text-yellow-800 font-bold text-xs outline-none appearance-none truncate text-center"></select>
-                            <div class="absolute right-2 top-4 pointer-events-none text-yellow-600"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
-                        </div>
+        <div id="main-content">
+            
+            <section id="view-home" class="view-section pt-2">
+                
+                <div class="flex gap-2 mb-3">
+                    <div class="flex-1 relative">
+                        <div class="absolute left-3 top-3.5 text-gray-400 pointer-events-none"><i data-lucide="calendar" class="w-4 h-4"></i></div>
+                        <input type="date" id="session-date" onchange="ONS.UI.Home.renderSessionLogs()" class="w-full h-11 bg-white border border-gray-200 pl-9 text-sm font-bold shadow-sm outline-none text-gray-700">
                     </div>
+                    <div id="home-admin-wrapper" class="hidden relative w-1/2">
+                        <select id="home-member-select" onchange="ONS.UI.Home.renderSessionLogs()" class="w-full h-11 bg-yellow-50 border border-yellow-200 text-yellow-900 font-bold text-xs outline-none pl-2 pr-6 appearance-none truncate"></select>
+                        <div class="absolute right-2 top-3.5 pointer-events-none text-yellow-700"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+                    </div>
+                </div>
 
-                    <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-1 mb-6">
-                        <div class="p-4">
-                            <label class="text-xs font-bold text-gray-400 uppercase mb-2 block ml-1">Ejercicio</label>
-                            <div class="relative mb-4">
-                                <select id="exercise-select" onchange="ONS.UI.Home.updatePreview()" class="w-full h-14 bg-gray-50 border border-gray-200 rounded-2xl px-4 pr-10 text-gray-900 font-bold text-lg outline-none appearance-none">
-                                    <option value="">Seleccionar...</option>
-                                </select>
-                                <div class="absolute right-4 top-4 pointer-events-none text-gray-400"><i data-lucide="chevron-down" class="w-6 h-6"></i></div>
+                <div class="ios-card p-1 mb-6 relative">
+                    <div class="p-3">
+                        <div class="relative mb-4">
+                            <select id="exercise-select" onchange="ONS.UI.Home.updatePreview()" class="w-full h-14 bg-gray-50 border border-gray-200 px-4 pr-10 text-gray-900 font-bold text-lg outline-none appearance-none transition focus:bg-white focus:ring-2 focus:ring-blue-100">
+                                <option value="">Seleccionar Ejercicio...</option>
+                            </select>
+                            <div class="absolute right-4 top-4 pointer-events-none text-gray-400"><i data-lucide="chevron-down" class="w-6 h-6"></i></div>
+                        </div>
+
+                        <div id="exercise-preview-card" class="hidden flex gap-3 items-center bg-blue-50/50 p-3 rounded-xl border border-blue-100 mb-4">
+                            <div class="w-12 h-12 bg-white rounded-lg p-1 shadow-sm shrink-0 flex items-center justify-center">
+                                <img id="preview-img" src="" class="w-full h-full object-contain" onerror="this.style.display='none'">
                             </div>
+                            <div class="min-w-0">
+                                <div id="preview-name" class="font-bold text-sm text-blue-900 leading-tight"></div>
+                                <div id="preview-group" class="text-[10px] text-blue-600 font-bold uppercase mt-0.5 tracking-wide"></div>
+                            </div>
+                        </div>
 
-                            <div id="exercise-preview-card" class="hidden flex gap-3 items-center bg-blue-50 p-3 rounded-2xl border border-blue-100 mb-6">
-                                <img id="preview-img" src="" class="w-12 h-12 object-contain bg-white rounded-lg p-1" onerror="this.style.display='none'">
-                                <div class="min-w-0">
-                                    <div id="preview-name" class="font-bold text-sm text-blue-900 leading-tight"></div>
-                                    <div id="preview-group" class="text-xs text-blue-600 font-bold uppercase mt-0.5"></div>
+                        <div id="series-container" class="hidden">
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                                    <div class="text-[10px] text-gray-400 font-bold text-center mb-1 uppercase">Serie 1</div>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="s1-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 bg-white border border-gray-200 text-center font-bold text-lg focus:border-blue-500 transition">
+                                        <input type="number" id="s1-reps" placeholder="Rps" inputmode="decimal" class="w-full h-12 bg-white border border-gray-200 text-center font-medium text-lg focus:border-blue-500 transition">
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                                    <div class="text-[10px] text-gray-400 font-bold text-center mb-1 uppercase">Serie 2</div>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="s2-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 bg-white border border-gray-200 text-center font-bold text-lg focus:border-blue-500 transition">
+                                        <input type="number" id="s2-reps" placeholder="Rps" inputmode="decimal" class="w-full h-12 bg-white border border-gray-200 text-center font-medium text-lg focus:border-blue-500 transition">
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                                    <div class="text-[10px] text-gray-400 font-bold text-center mb-1 uppercase">Serie 3</div>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="s3-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 bg-white border border-gray-200 text-center font-bold text-lg focus:border-blue-500 transition">
+                                        <input type="number" id="s3-reps" placeholder="Rps" inputmode="decimal" class="w-full h-12 bg-white border border-gray-200 text-center font-medium text-lg focus:border-blue-500 transition">
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                                    <div class="text-[10px] text-gray-400 font-bold text-center mb-1 uppercase">Serie 4</div>
+                                    <div class="flex gap-1">
+                                        <input type="number" id="s4-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 bg-white border border-gray-200 text-center font-bold text-lg focus:border-blue-500 transition">
+                                        <input type="number" id="s4-reps" placeholder="Rps" inputmode="decimal" class="w-full h-12 bg-white border border-gray-200 text-center font-medium text-lg focus:border-blue-500 transition">
+                                    </div>
                                 </div>
                             </div>
 
-                            <div id="series-container" class="hidden">
-                                <div class="grid grid-cols-4 gap-2 mb-2 text-center">
-                                    <div class="text-[10px] font-bold text-gray-400">S1</div>
-                                    <div class="text-[10px] font-bold text-gray-400">S2</div>
-                                    <div class="text-[10px] font-bold text-gray-400">S3</div>
-                                    <div class="text-[10px] font-bold text-gray-400">S4</div>
-                                </div>
-                                <div class="grid grid-cols-4 gap-2 mb-6">
-                                    <div class="space-y-2">
-                                        <input type="number" id="s1-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-lg">
-                                        <input type="number" id="s1-reps" placeholder="Rps" inputmode="decimal" class="w-full h-10 bg-white border border-gray-200 rounded-xl text-center text-sm">
-                                    </div>
-                                    <div class="space-y-2">
-                                        <input type="number" id="s2-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-lg">
-                                        <input type="number" id="s2-reps" placeholder="Rps" inputmode="decimal" class="w-full h-10 bg-white border border-gray-200 rounded-xl text-center text-sm">
-                                    </div>
-                                    <div class="space-y-2">
-                                        <input type="number" id="s3-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-lg">
-                                        <input type="number" id="s3-reps" placeholder="Rps" inputmode="decimal" class="w-full h-10 bg-white border border-gray-200 rounded-xl text-center text-sm">
-                                    </div>
-                                    <div class="space-y-2">
-                                        <input type="number" id="s4-kg" placeholder="Kg" inputmode="decimal" class="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl text-center font-bold text-lg">
-                                        <input type="number" id="s4-reps" placeholder="Rps" inputmode="decimal" class="w-full h-10 bg-white border border-gray-200 rounded-xl text-center text-sm">
-                                    </div>
-                                </div>
-                                <button onclick="ONS.UI.Home.saveLog()" class="w-full h-14 bg-blue-600 text-white font-bold rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2 text-lg">
-                                    <i data-lucide="save" class="w-5 h-5"></i> GUARDAR
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center px-2 mb-2">
-                        <h3 class="text-sm font-bold text-gray-500 uppercase">Hoy</h3>
-                        <span id="today-count" class="text-xs bg-gray-200 px-2 py-1 rounded-full font-bold text-gray-600">0</span>
-                    </div>
-                    <div id="session-logs-list" class="space-y-3 pb-safe"></div>
-                </section>
-
-                <section id="view-reports" class="view-section hidden pt-4">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4 px-1">Evolución</h2>
-                    
-                    <div class="bg-white rounded-3xl p-4 shadow-sm border border-gray-200 mb-6 space-y-3">
-                        <div id="report-member-wrapper" class="hidden">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase">Miembro</label>
-                            <select id="report-member-select" onchange="ONS.UI.Reports.update()" class="w-full h-10 bg-blue-50 border-0 rounded-lg px-2 text-blue-900 font-bold text-sm mb-2"></select>
-                        </div>
-                        <div class="flex gap-2">
-                            <div class="w-2/3">
-                                <label class="text-[10px] font-bold text-gray-400 uppercase">Ejercicio</label>
-                                <select id="report-exercise-select" onchange="ONS.UI.Reports.update()" class="w-full h-10 bg-gray-50 border border-gray-200 rounded-lg px-2 text-sm"></select>
-                            </div>
-                            <div class="w-1/3">
-                                <label class="text-[10px] font-bold text-gray-400 uppercase">Dato</label>
-                                <select id="report-metric-select" onchange="ONS.UI.Reports.update()" class="w-full h-10 bg-gray-50 border border-gray-200 rounded-lg px-2 text-sm">
-                                    <option value="max">1RM</option><option value="vol">Volumen</option><option value="ton">Total Kg</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-3xl p-4 shadow-sm border border-gray-200 mb-6">
-                        <div class="relative h-56 w-full"><canvas id="evolutionChart"></canvas></div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 mb-6">
-                        <div class="bg-blue-600 text-white p-4 rounded-2xl shadow">
-                            <div class="text-[10px] opacity-75 font-bold uppercase">Días Totales</div>
-                            <div id="rep-stat-days" class="text-3xl font-bold">0</div>
-                        </div>
-                        <div class="bg-white p-4 rounded-2xl border border-gray-200">
-                            <div class="text-[10px] text-gray-400 font-bold uppercase">Series Totales</div>
-                            <div id="rep-stat-total" class="text-3xl font-bold text-gray-800">0</div>
-                        </div>
-                    </div>
-
-                    <h3 class="text-sm font-bold text-gray-500 uppercase px-1 mb-2">Histórico</h3>
-                    <div class="bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-sm">
-                        <div class="table-container max-h-80 overflow-y-auto">
-                            <table class="w-full text-xs text-left">
-                                <thead class="bg-gray-50 text-gray-500 font-bold border-b"><tr><th class="p-3">Fecha</th><th class="p-3">Registro</th><th class="p-3 text-right">#</th></tr></thead>
-                                <tbody id="report-table-exercise" class="divide-y divide-gray-100"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="view-admin" class="view-section hidden pt-4">
-                    <h2 class="text-2xl font-bold text-yellow-600 mb-4 px-1">Admin</h2>
-                    
-                    <div class="bg-yellow-50 rounded-3xl border border-yellow-200 p-5 mb-6">
-                        <h3 class="font-bold text-yellow-900 mb-3">Copias de Seguridad</h3>
-                        <div class="flex flex-col gap-3">
-                            <button onclick="ONS.Backup.downloadJSON()" class="h-12 bg-yellow-600 text-white rounded-xl font-bold text-sm shadow flex items-center justify-center gap-2">
-                                <i data-lucide="download" class="w-4 h-4"></i> Descargar Todo
+                            <button onclick="ONS.UI.Home.saveLog()" class="w-full h-14 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition flex items-center justify-center gap-2 text-lg tracking-wide sticky bottom-0 z-10">
+                                <i data-lucide="save" class="w-5 h-5"></i> GUARDAR DATOS
                             </button>
-                            <label class="h-12 bg-white text-yellow-800 border border-yellow-200 rounded-xl font-bold text-sm flex items-center justify-center gap-2 cursor-pointer">
-                                <i data-lucide="upload" class="w-4 h-4"></i> Restaurar
-                                <input type="file" class="hidden" onchange="ONS.Backup.uploadJSON(this)">
-                            </label>
-                        </div>
-                        <p id="backup-status" class="text-center text-[10px] text-yellow-600 mt-2"></p>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 mb-10">
-                        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm"><div class="text-[10px] text-gray-400 font-bold uppercase">Usuarios</div><div id="adm-stat-users" class="text-2xl font-bold">0</div></div>
-                        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm"><div class="text-[10px] text-gray-400 font-bold uppercase">Registros</div><div id="adm-stat-logs" class="text-2xl font-bold">0</div></div>
-                    </div>
-                </section>
-
-                <section id="view-members" class="view-section hidden pt-4">
-                    <div class="flex justify-between items-center mb-4 px-1">
-                        <h2 class="text-2xl font-bold text-gray-900">Equipo</h2>
-                        <button onclick="ONS.UI.Members.openModal()" class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center shadow"><i data-lucide="plus" class="w-6 h-6"></i></button>
-                    </div>
-                    <div class="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
-                        <div class="table-container">
-                            <table class="w-full text-sm text-left">
-                                <thead class="bg-gray-50 border-b"><tr><th class="p-4 text-xs font-bold text-gray-500">Chalet</th><th class="p-4 text-xs font-bold text-gray-500">Usuario</th><th class="p-4"></th></tr></thead>
-                                <tbody id="members-table-body" class="divide-y divide-gray-100"></tbody>
-                            </table>
                         </div>
                     </div>
-                </section>
+                </div>
 
-            </div>
+                <div class="flex justify-between items-end px-2 mb-2">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wide">Actividad Hoy</h3>
+                    <span id="today-count" class="text-xs bg-gray-200 px-2 py-0.5 rounded text-gray-600 font-bold">0</span>
+                </div>
+                <div id="session-logs-list" class="space-y-3 pb-safe"></div>
+            </section>
+
+            <section id="view-reports" class="view-section">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Evolución</h2>
+                
+                <div class="ios-card p-4 mb-6 space-y-4">
+                    <div id="report-member-wrapper" class="hidden">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Miembro</label>
+                        <select id="report-member-select" onchange="ONS.UI.Reports.update()" class="w-full h-10 bg-blue-50 border-0 text-blue-900 font-bold text-sm mb-2"></select>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="w-2/3">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase">Ejercicio</label>
+                            <select id="report-exercise-select" onchange="ONS.UI.Reports.update()" class="w-full h-11 bg-gray-50 border-gray-200 text-sm font-medium"></select>
+                        </div>
+                        <div class="w-1/3">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase">Dato</label>
+                            <select id="report-metric-select" onchange="ONS.UI.Reports.update()" class="w-full h-11 bg-gray-50 border-gray-200 text-sm font-medium">
+                                <option value="max">1RM</option><option value="vol">Volumen</option><option value="ton">Total Kg</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ios-card p-4 mb-6">
+                    <div class="relative h-56 w-full"><canvas id="evolutionChart"></canvas></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-blue-600 text-white p-4 rounded-2xl shadow-lg shadow-blue-200">
+                        <div class="text-[10px] opacity-75 font-bold uppercase">Días Totales</div>
+                        <div id="rep-stat-days" class="text-3xl font-bold">0</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-200">
+                        <div class="text-[10px] text-gray-400 font-bold uppercase">Series Totales</div>
+                        <div id="rep-stat-total" class="text-3xl font-bold text-gray-800">0</div>
+                    </div>
+                </div>
+
+                <div class="ios-card overflow-hidden">
+                    <div class="bg-gray-50 px-4 py-2 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase">Histórico Detallado</div>
+                    <div class="table-container max-h-80 overflow-y-auto">
+                        <table class="w-full text-xs text-left">
+                            <tbody id="report-table-exercise" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-admin" class="view-section">
+                <h2 class="text-2xl font-bold text-yellow-600 mb-4">Administración</h2>
+                
+                <div class="ios-card bg-yellow-50 border-yellow-200 p-5 mb-6">
+                    <h3 class="font-bold text-yellow-900 mb-4 flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i> Copia de Seguridad</h3>
+                    <div class="flex flex-col gap-3">
+                        <button onclick="ONS.Backup.downloadJSON()" class="h-12 bg-yellow-600 text-white rounded-xl font-bold text-sm shadow active:scale-95 transition flex items-center justify-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i> Descargar Datos
+                        </button>
+                        <label class="h-12 bg-white text-yellow-800 border border-yellow-200 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:bg-yellow-50 transition cursor-pointer">
+                            <i data-lucide="upload" class="w-4 h-4"></i> Restaurar Copia
+                            <input type="file" class="hidden" onchange="ONS.Backup.uploadJSON(this)">
+                        </label>
+                    </div>
+                    <p id="backup-status" class="text-center text-[10px] text-yellow-700 mt-3 font-mono"></p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-24">
+                    <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm"><div class="text-[10px] text-gray-400 font-bold uppercase">Usuarios</div><div id="adm-stat-users" class="text-2xl font-bold">0</div></div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm"><div class="text-[10px] text-gray-400 font-bold uppercase">Registros</div><div id="adm-stat-logs" class="text-2xl font-bold">0</div></div>
+                </div>
+            </section>
+
+            <section id="view-members" class="view-section">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">Equipo</h2>
+                    <button onclick="ONS.UI.Members.openModal()" class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition"><i data-lucide="plus" class="w-6 h-6"></i></button>
+                </div>
+                <div class="ios-card overflow-hidden">
+                    <div class="table-container">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold border-b"><tr><th class="p-3">Chalet</th><th class="p-3">Usuario</th><th class="p-3 text-right">#</th></tr></thead>
+                            <tbody id="members-table-body" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
         </div>
     </div>
 
-    <nav id="bottom-bar" class="hidden-force fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 h-[80px] z-40 safe-pb flex justify-around items-start pt-2">
-        <button onclick="ONS.UI.navigateTo('home')" id="nav-home" class="nav-item flex flex-col items-center w-full text-gray-400">
+    <nav id="bottom-bar" class="hidden-force fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur border-t border-gray-200 h-[85px] z-40 safe-pb flex justify-around items-start pt-3 shadow-lg">
+        <button onclick="ONS.UI.navigateTo('home')" id="nav-home" class="nav-item flex flex-col items-center w-full">
             <i data-lucide="home" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-bold">Inicio</span>
         </button>
-        <button onclick="ONS.UI.navigateTo('reports')" id="nav-reports" class="nav-item flex flex-col items-center w-full text-gray-400">
+        <button onclick="ONS.UI.navigateTo('reports')" id="nav-reports" class="nav-item flex flex-col items-center w-full">
             <i data-lucide="bar-chart-2" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-bold">Evolución</span>
         </button>
-        <button onclick="ONS.UI.navigateTo('members')" id="nav-members" class="nav-item hidden flex-col items-center w-full text-gray-400">
+        <button onclick="ONS.UI.navigateTo('members')" id="nav-members" class="nav-item hidden flex-col items-center w-full">
             <i data-lucide="users" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-bold">Equipo</span>
         </button>
         <button onclick="ONS.UI.navigateTo('admin')" id="nav-admin" class="nav-item hidden flex-col items-center w-full text-yellow-600">
             <i data-lucide="shield" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-bold">Admin</span>
         </button>
-        <button onclick="ONS.UI.openHelp()" class="nav-item flex flex-col items-center w-full text-gray-400">
+        <button onclick="ONS.UI.openHelp()" class="nav-item flex flex-col items-center w-full">
             <i data-lucide="help-circle" class="w-6 h-6 mb-1"></i><span class="text-[10px] font-bold">Ayuda</span>
         </button>
     </nav>
 
-    <div id="modal-member" class="fixed inset-0 bg-black/60 hidden z-50 flex items-end sm:items-center justify-center">
-        <div class="bg-white w-full sm:w-96 rounded-t-3xl sm:rounded-3xl p-6 animate-up">
-            <h3 id="modal-member-title" class="text-xl font-bold mb-4">Miembro</h3>
-            <form onsubmit="ONS.UI.Members.save(event)" class="space-y-3">
-                <input type="hidden" id="mem-userid">
-                <div class="flex gap-2">
-                    <input type="text" id="mem-name" class="w-1/2 h-12 bg-gray-50 border rounded-xl px-3" placeholder="Nombre" required>
-                    <input type="text" id="mem-lastname" class="w-1/2 h-12 bg-gray-50 border rounded-xl px-3" placeholder="Apellido" required>
-                </div>
-                <input type="text" id="mem-chalet" class="w-full h-12 bg-gray-50 border rounded-xl px-3" placeholder="Chalet" required>
-                <input type="email" id="mem-email" class="w-full h-12 bg-gray-50 border rounded-xl px-3" placeholder="Email (opcional)">
-                <input type="password" id="mem-pass" class="w-full h-12 bg-gray-50 border rounded-xl px-3" placeholder="Contraseña">
-                <div id="cnt-isadmin" class="flex items-center gap-2 p-2">
-                    <input type="checkbox" id="mem-isadmin" class="w-5 h-5"><label>Es Administrador</label>
-                </div>
-                <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="ONS.UI.Members.closeModal()" class="flex-1 h-12 bg-gray-100 rounded-xl font-bold text-gray-600">Cancelar</button>
-                    <button type="submit" class="flex-1 h-12 bg-blue-600 text-white rounded-xl font-bold">Guardar</button>
-                </div>
+    <div id="modal-changepass" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-slide-up">
+            <div class="text-center mb-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 bg-red-100 text-red-600 rounded-full mb-3"><i data-lucide="shield-alert" class="w-6 h-6"></i></div>
+                <h3 class="text-xl font-bold text-gray-900">Seguridad</h3>
+                <p class="text-sm text-gray-500 mt-1">Debes cambiar tu contraseña por defecto.</p>
+            </div>
+            <form onsubmit="ONS.Auth.changePassword(event)" class="space-y-4">
+                <input type="password" id="new-pass" class="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 font-medium" placeholder="Nueva Contraseña" required>
+                <button type="submit" class="w-full h-12 bg-red-600 text-white font-bold rounded-xl shadow-lg">Actualizar y Entrar</button>
             </form>
         </div>
     </div>
 
-    <div id="modal-edit-log" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
-            <h3 class="text-lg font-bold">Editar</h3>
-            <div id="edit-log-info" class="text-xs text-gray-500 mb-4 uppercase"></div>
+    <div id="modal-edit-log" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-slide-up">
+            <h3 class="text-lg font-bold mb-1">Editar Serie</h3>
+            <div id="edit-log-info" class="text-xs text-gray-400 mb-6 font-bold uppercase tracking-wide"></div>
             <input type="hidden" id="edit-log-id">
             <div class="grid grid-cols-2 gap-3 mb-6">
-                <div><label class="text-[10px] font-bold text-gray-400 block">S1</label><div class="flex gap-1"><input id="e-s1w" type="number" class="w-1/2 border rounded-lg p-1 text-center"><input id="e-s1r" type="number" class="w-1/2 border rounded-lg p-1 text-center bg-gray-50"></div></div>
-                <div><label class="text-[10px] font-bold text-gray-400 block">S2</label><div class="flex gap-1"><input id="e-s2w" type="number" class="w-1/2 border rounded-lg p-1 text-center"><input id="e-s2r" type="number" class="w-1/2 border rounded-lg p-1 text-center bg-gray-50"></div></div>
-                <div><label class="text-[10px] font-bold text-gray-400 block">S3</label><div class="flex gap-1"><input id="e-s3w" type="number" class="w-1/2 border rounded-lg p-1 text-center"><input id="e-s3r" type="number" class="w-1/2 border rounded-lg p-1 text-center bg-gray-50"></div></div>
-                <div><label class="text-[10px] font-bold text-gray-400 block">S4</label><div class="flex gap-1"><input id="e-s4w" type="number" class="w-1/2 border rounded-lg p-1 text-center"><input id="e-s4r" type="number" class="w-1/2 border rounded-lg p-1 text-center bg-gray-50"></div></div>
+                <div><label class="text-[10px] font-bold text-gray-400 block mb-1">S1</label><div class="flex gap-1"><input id="e-s1w" type="number" class="w-1/2 border rounded-lg p-2 text-center font-bold"><input id="e-s1r" type="number" class="w-1/2 border rounded-lg p-2 text-center bg-gray-50"></div></div>
+                <div><label class="text-[10px] font-bold text-gray-400 block mb-1">S2</label><div class="flex gap-1"><input id="e-s2w" type="number" class="w-1/2 border rounded-lg p-2 text-center font-bold"><input id="e-s2r" type="number" class="w-1/2 border rounded-lg p-2 text-center bg-gray-50"></div></div>
+                <div><label class="text-[10px] font-bold text-gray-400 block mb-1">S3</label><div class="flex gap-1"><input id="e-s3w" type="number" class="w-1/2 border rounded-lg p-2 text-center font-bold"><input id="e-s3r" type="number" class="w-1/2 border rounded-lg p-2 text-center bg-gray-50"></div></div>
+                <div><label class="text-[10px] font-bold text-gray-400 block mb-1">S4</label><div class="flex gap-1"><input id="e-s4w" type="number" class="w-1/2 border rounded-lg p-2 text-center font-bold"><input id="e-s4r" type="number" class="w-1/2 border rounded-lg p-2 text-center bg-gray-50"></div></div>
             </div>
             <div class="flex gap-3">
                 <button onclick="document.getElementById('modal-edit-log').classList.add('hidden')" class="flex-1 h-12 bg-gray-100 font-bold rounded-xl text-gray-600">Cancelar</button>
                 <button onclick="ONS.UI.Reports.saveEdit()" class="flex-1 h-12 bg-blue-600 font-bold rounded-xl text-white">Guardar</button>
             </div>
-            <button onclick="ONS.UI.Reports.deleteLog(document.getElementById('edit-log-id').value); document.getElementById('modal-edit-log').classList.add('hidden')" class="w-full mt-3 h-10 text-red-500 font-bold text-xs">Eliminar Registro</button>
+            <button onclick="ONS.UI.Reports.deleteLog(document.getElementById('edit-log-id').value); document.getElementById('modal-edit-log').classList.add('hidden')" class="w-full mt-4 text-red-500 font-bold text-xs py-2">Eliminar Registro</button>
         </div>
     </div>
 
-    <div id="modal-help" class="fixed inset-0 bg-black/60 hidden z-50 flex items-end sm:items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl p-6">
-            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-xl">Ayuda</h3><button onclick="ONS.UI.closeHelp()" class="p-2 bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button></div>
-            <div class="prose text-sm text-gray-600"><p>Versión 5.2 - iOS Fix</p><p>Usa la pestaña Inicio para registrar.</p></div>
+    <div id="modal-member" class="fixed inset-0 bg-black/60 hidden z-50 flex items-end sm:items-center justify-center backdrop-blur-sm">
+        <div class="bg-white w-full sm:w-96 rounded-t-3xl sm:rounded-3xl p-6 animate-slide-up pb-10 sm:pb-6">
+            <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6 sm:hidden"></div>
+            <h3 id="modal-member-title" class="text-xl font-bold mb-6 text-gray-900">Nuevo Miembro</h3>
+            <form onsubmit="ONS.UI.Members.save(event)" class="space-y-3">
+                <input type="hidden" id="mem-userid">
+                <div class="flex gap-3">
+                    <input type="text" id="mem-name" class="w-1/2 h-12 bg-gray-50 border rounded-xl px-4" placeholder="Nombre" required>
+                    <input type="text" id="mem-lastname" class="w-1/2 h-12 bg-gray-50 border rounded-xl px-4" placeholder="Apellido" required>
+                </div>
+                <input type="text" id="mem-chalet" class="w-full h-12 bg-gray-50 border rounded-xl px-4" placeholder="Chalet / Unidad" required>
+                <input type="email" id="mem-email" class="w-full h-12 bg-gray-50 border rounded-xl px-4" placeholder="Email (Opcional)">
+                <input type="password" id="mem-pass" class="w-full h-12 bg-gray-50 border rounded-xl px-4" placeholder="Contraseña">
+                <div id="cnt-isadmin" class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <input type="checkbox" id="mem-isadmin" class="w-5 h-5 rounded text-blue-600"><label for="mem-isadmin" class="font-medium text-sm">Es Administrador</label>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="ONS.UI.Members.closeModal()" class="flex-1 h-12 bg-gray-100 text-gray-600 font-bold rounded-xl">Cancelar</button>
+                    <button type="submit" class="flex-1 h-12 bg-blue-600 text-white font-bold rounded-xl">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-help" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-3xl p-0 flex flex-col max-h-[70vh] shadow-2xl animate-slide-up overflow-hidden">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="font-bold text-lg">Ayuda</h3>
+                <button onclick="ONS.UI.closeHelp()" class="p-2 bg-gray-200 rounded-full text-gray-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="p-6 modal-body prose text-sm text-gray-600 leading-relaxed">
+                <h4 class="font-bold text-blue-900">Registro Rápido</h4>
+                <p>En la pestaña <strong>Inicio</strong>, selecciona el ejercicio y rellena los pesos. No hace falta completar las 4 series, solo las que hagas.</p>
+                <hr class="my-4 border-gray-100">
+                <h4 class="font-bold text-blue-900">Evolución</h4>
+                <p>Consulta tus gráficas de fuerza y volumen en la pestaña <strong>Evolución</strong>.</p>
+            </div>
         </div>
     </div>
 
     <script>
+        window.onerror = function(msg, url, line, col, error) { console.error("Global Error:", msg, error); return false; };
+
         const ONS = {
-            Utils: { uuid() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8); return v.toString(16); }); }, fmtDate(iso){ if(!iso) return ''; const d=new Date(iso); return `${d.getDate()}/${d.getMonth()+1}`; } },
+            Utils: { 
+                uuid() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8); return v.toString(16); }); },
+                fmtDate(iso){ if(!iso) return ''; const d=new Date(iso); return `${d.getDate()}/${d.getMonth()+1}`; } 
+            },
             Catalog: [
                 { id: "leg_sq_gob", name: "Goblet Squat", group: "PIERNAS", img: "Sentadillas.png" },
                 { id: "leg_dl_rom", name: "Peso Muerto Rumano", group: "PIERNAS", img: "Peso Muerto.png" },
@@ -397,7 +454,24 @@
                 login(e) {
                     e.preventDefault();
                     const u = ONS.Data.findUser(document.getElementById('login-user').value, document.getElementById('login-pass').value);
-                    if(u) { this.user=u; ONS.UI.initApp(); } else alert("Credenciales incorrectas");
+                    if(u) { 
+                        this.user=u; 
+                        // SECURITY CHECK
+                        if(u.password === 'admin') {
+                            document.getElementById('modal-changepass').classList.remove('hidden');
+                        } else {
+                            ONS.UI.initApp(); 
+                        }
+                    } else alert("Credenciales incorrectas");
+                },
+                changePassword(e) {
+                    e.preventDefault();
+                    const newP = document.getElementById('new-pass').value;
+                    if(newP.length < 4) return alert("Mínimo 4 caracteres");
+                    this.user.password = newP;
+                    ONS.Data.upsertUser(this.user);
+                    document.getElementById('modal-changepass').classList.add('hidden');
+                    ONS.UI.initApp();
                 },
                 logout() { window.location.reload(); },
                 isAdmin() { return this.user && this.user.role === 'ADMIN'; }
@@ -418,18 +492,8 @@
                         try {
                             const d = JSON.parse(e.target.result);
                             if(d.users && d.logs) {
-                                // Merge Users
-                                d.users.forEach(rem => {
-                                    const locIdx = ONS.Data.users.findIndex(u => u.userId === rem.userId);
-                                    if(locIdx === -1) ONS.Data.users.push(rem);
-                                    else if(rem.updatedAt > ONS.Data.users[locIdx].updatedAt) ONS.Data.users[locIdx] = rem;
-                                });
-                                // Merge Logs
-                                d.logs.forEach(rem => {
-                                    const locIdx = ONS.Data.logs.findIndex(l => l.logId === rem.logId);
-                                    if(locIdx === -1) ONS.Data.logs.push(rem);
-                                    else if(rem.updatedAt > ONS.Data.logs[locIdx].updatedAt) ONS.Data.logs[locIdx] = rem;
-                                });
+                                d.users.forEach(rem => { const locIdx = ONS.Data.users.findIndex(u => u.userId === rem.userId); if(locIdx === -1) ONS.Data.users.push(rem); else if(rem.updatedAt > ONS.Data.users[locIdx].updatedAt) ONS.Data.users[locIdx] = rem; });
+                                d.logs.forEach(rem => { const locIdx = ONS.Data.logs.findIndex(l => l.logId === rem.logId); if(locIdx === -1) ONS.Data.logs.push(rem); else if(rem.updatedAt > ONS.Data.logs[locIdx].updatedAt) ONS.Data.logs[locIdx] = rem; });
                                 ONS.Data.save(); alert("Sincronizado"); location.reload();
                             }
                         } catch(err) { alert("Error JSON"); }
@@ -440,11 +504,11 @@
             UI: {
                 chart: null,
                 initApp() {
-                    // SWITCH CONTAINERS (Fix Overlay)
+                    // SWITCH CONTAINERS
                     document.getElementById('login-container').classList.add('hidden-force');
-                    document.getElementById('app-container').classList.remove('hidden-force');
+                    document.getElementById('app-wrapper').classList.remove('hidden-force');
                     document.getElementById('bottom-bar').classList.remove('hidden-force');
-                    document.getElementById('bottom-bar').style.display = 'flex'; // Force flex
+                    document.getElementById('bottom-bar').style.display = 'flex';
                     
                     document.getElementById('header-user-badge').innerText = ONS.Auth.user.username;
                     
@@ -461,8 +525,13 @@
                     lucide.createIcons();
                 },
                 navigateTo(id) {
-                    document.querySelectorAll('.view-section').forEach(e => e.classList.remove('active'));
-                    document.getElementById('view-'+id).classList.add('active');
+                    document.querySelectorAll('.view-section').forEach(e => {
+                        e.classList.remove('active'); 
+                        e.style.display = 'none'; // Ensure display none via inline style to override any conflict
+                    });
+                    const target = document.getElementById(`view-${id}`);
+                    target.style.display = 'block'; // Force display
+                    setTimeout(() => target.classList.add('active'), 10);
                     
                     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
                     document.getElementById('nav-'+id).classList.add('active');
@@ -480,7 +549,6 @@
                         ONS.Catalog.forEach(x => { const o=document.createElement('option'); o.value=x.id; o.text=x.name; sel.add(o); });
                         document.getElementById('session-date').valueAsDate = new Date();
                         
-                        // Admin selector
                         const admSel = document.getElementById('home-member-select');
                         if (admSel) {
                             admSel.innerHTML = '<option value="'+ONS.Auth.user.userId+'">Para mí</option>';
@@ -498,9 +566,8 @@
                         document.getElementById('preview-name').innerText = ex.name;
                         document.getElementById('preview-group').innerText = ex.group;
                         document.getElementById('preview-img').src = ex.img;
-                        box.classList.remove('hidden');
-                        box.style.display='flex';
-                        grid.classList.remove('hidden');
+                        box.classList.remove('hidden'); box.style.display='flex';
+                        grid.classList.remove('hidden'); 
                         for(let i=1;i<=4;i++) { document.getElementById('s'+i+'-kg').value=''; document.getElementById('s'+i+'-reps').value=''; }
                     },
                     saveLog() {
@@ -520,9 +587,7 @@
                         if(series.length===0) return alert("Mete al menos 1 serie");
                         
                         const ex = ONS.Catalog.find(x=>x.id===exId);
-                        ONS.Data.upsertLog({
-                            userId: uid, date: date, exerciseId: ex.id, exerciseName: ex.name, grupoMuscular: ex.group, series: series
-                        });
+                        ONS.Data.upsertLog({ userId: uid, date: date, exerciseId: ex.id, exerciseName: ex.name, grupoMuscular: ex.group, series: series });
                         
                         const btn = document.querySelector('#series-container button');
                         btn.innerHTML = '¡Guardado!'; btn.classList.add('bg-green-600');
@@ -549,7 +614,7 @@
                         
                         logs.forEach(l => {
                             const ex = ONS.Catalog.find(x => x.id === l.exerciseId) || { img: '' };
-                            const ser = l.series.map((s,i) => `<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-bold font-mono">S${i+1}:${s.w}/${s.r}</span>`).join(' ');
+                            const ser = l.series.map((s,i) => `<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-md text-xs font-bold font-mono">S${i+1}:${s.w}/${s.r}</span>`).join(' ');
                             list.innerHTML += `<div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3"><div class="w-10 h-10 bg-gray-50 rounded-xl p-1 shrink-0"><img src="${ex.img}" class="w-full h-full object-contain" onerror="this.style.display='none'"></div><div class="flex-grow min-w-0"><div class="font-bold text-sm text-gray-900 truncate">${l.exerciseName}</div><div class="flex flex-wrap gap-1 mt-1">${ser}</div></div><button onclick="ONS.UI.Home.deleteLog('${l.logId}')" class="text-gray-300 hover:text-red-500 p-2"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div>`;
                         });
                         lucide.createIcons();
@@ -599,27 +664,25 @@
                 },
                 Reports: {
                     init() {
-                        const mSel = document.getElementById('report-member-select'), eSel = document.getElementById('report-exercise-select');
-                        mSel.innerHTML = '';
-                        if (ONS.Auth.isAdmin()) { 
-                            document.getElementById('report-member-wrapper').classList.remove('hidden'); 
-                            ONS.Data.users.filter(u=>u.status==='ACTIVE').forEach(u => { const op = document.createElement('option'); op.value = u.userId; op.text = `${u.firstName} ${u.lastName}`; mSel.add(op); }); 
-                        } 
-                        else { document.getElementById('report-member-wrapper').classList.add('hidden'); const op = document.createElement('option'); op.value = ONS.Auth.user.userId; op.text = "Yo"; mSel.add(op); }
-                        eSel.innerHTML = ''; ONS.Catalog.forEach(e => { const op = document.createElement('option'); op.value = e.id; op.text = e.name; eSel.add(op); });
-                        mSel.value = ONS.Auth.user.userId; if(ONS.Catalog.length > 0) eSel.value = ONS.Catalog[0].id;
-                        this.update();
+                        try {
+                            const mSel = document.getElementById('report-member-select'), eSel = document.getElementById('report-exercise-select');
+                            mSel.innerHTML = '';
+                            if (ONS.Auth.isAdmin()) { document.getElementById('report-member-wrapper').classList.remove('hidden'); ONS.Data.users.filter(u=>u.status==='ACTIVE').forEach(u => { const op = document.createElement('option'); op.value = u.userId; op.text = `${u.firstName} ${u.lastName}`; mSel.add(op); }); } 
+                            else { document.getElementById('report-member-wrapper').classList.add('hidden'); const op = document.createElement('option'); op.value = ONS.Auth.user.userId; op.text = "Yo"; mSel.add(op); }
+                            eSel.innerHTML = ''; ONS.Catalog.forEach(e => { const op = document.createElement('option'); op.value = e.id; op.text = e.name; eSel.add(op); });
+                            mSel.value = ONS.Auth.user.userId; if(ONS.Catalog.length > 0) eSel.value = ONS.Catalog[0].id;
+                            this.update();
+                        } catch(e) { console.error("Report Init Error:", e); }
                     },
                     update() {
                         const uid = document.getElementById('report-member-select').value, exId = document.getElementById('report-exercise-select').value, metric = document.getElementById('report-metric-select').value;
                         const logs = ONS.Data.logs.filter(l => !l.deleted && l.userId === uid);
-                        const exLogs = logs.filter(l => l.exerciseId === exId).sort((a,b) => new Date(a.date) - new Date(b.date)); // Sort ASC for chart
+                        const exLogs = logs.filter(l => l.exerciseId === exId).sort((a,b) => new Date(a.date) - new Date(b.date));
                         
                         const uniqueDays = new Set(logs.map(l => l.date));
                         document.getElementById('rep-stat-days').innerText = uniqueDays.size;
                         document.getElementById('rep-stat-total').innerText = logs.length;
 
-                        // Chart
                         const labels = exLogs.map(l => ONS.Utils.fmtDate(l.date));
                         const data = exLogs.map(l => { 
                             if (metric === 'max') return Math.max(...l.series.map(s => s.w)); 
@@ -631,11 +694,10 @@
                         const ctx = document.getElementById('evolutionChart').getContext('2d');
                         this.chart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: metric, data: data, borderColor: '#2563eb', tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
 
-                        // Table (Desc)
                         const tb = document.getElementById('report-table-exercise'); tb.innerHTML = '';
                         [...exLogs].reverse().forEach(l => { 
-                            const ser = l.series.map((s,i) => `S${i+1}:${s.w}/${s.r}`).join(' ');
-                            tb.innerHTML += `<tr class="border-b"><td class="p-3 font-mono">${ONS.Utils.fmtDate(l.date)}</td><td class="p-3 text-xs text-gray-500">${ser}</td><td class="p-3 text-right"><button onclick="ONS.UI.Reports.editLog('${l.logId}')" class="text-blue-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button></td></tr>`; 
+                            const ser = l.series.map((s,i) => `<span class="bg-gray-100 text-gray-700 px-1 rounded text-[10px] font-bold">S${i+1}:${s.w}/${s.r}</span>`).join(' ');
+                            tb.innerHTML += `<tr class="border-b border-gray-50"><td class="p-3 font-mono text-gray-500">${ONS.Utils.fmtDate(l.date)}</td><td class="p-3 text-xs text-gray-900">${ser}</td><td class="p-3 text-right"><button onclick="ONS.UI.Reports.editLog('${l.logId}')" class="text-blue-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button></td></tr>`; 
                         });
                         lucide.createIcons();
                     },
@@ -650,7 +712,7 @@
                         for(let i=1;i<=4;i++) { const w = document.getElementById(`e-s${i}w`).value, r = document.getElementById(`e-s${i}r`).value; if(w || r) newSeries.push({ w: parseFloat(w)||0, r: parseFloat(r)||0 }); }
                         l.series = newSeries; ONS.Data.upsertLog(l); document.getElementById('modal-edit-log').classList.add('hidden'); this.update();
                     },
-                    deleteLog(id) { if(confirm("¿Borrar?")) { ONS.Data.deleteLog(id); document.getElementById('modal-edit-log').classList.add('hidden'); this.update(); } }
+                    deleteLog(id) { if(confirm("¿Eliminar?")) { ONS.Data.deleteLog(id); document.getElementById('modal-edit-log').classList.add('hidden'); this.update(); } }
                 }
             },
             Init() { try { ONS.Data.init(); lucide.createIcons(); } catch(e) { console.log("Init Error"); } }
