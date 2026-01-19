@@ -456,7 +456,10 @@
                 { id: "tri_pd", name: "Jalón de Tríceps (Pushdown)", group: "TRÍCEPS", equip: "Máquina de Jalón", img: "Jalon de Triceps en Polea.png", notes: "Usa la barra o cuerda del jalón. Codos pegados a las costillas." },
                 { id: "tri_oh", name: "Jalón tras nuca Polea", group: "TRÍCEPS", equip: "Polea Alta + Cuerda", img: "Jalon por Encima de la Cabeza.png", notes: "De espaldas a la máquina. Da un paso adelante para estabilidad." },
                 { id: "tri_dips", name: "Fondos en Banco (Dips)", group: "TRÍCEPS", equip: "Banco", img: "Frondos en Banco.png", notes: "Manos en el borde del banco, pies en el suelo. Baja el glúteo cerca del banco." },
-                { id: "tri_cup", name: "Extensión Copa", group: "TRÍCEPS", equip: "1 Mancuerna pesada", img: "Extension Triceps Copa.png", notes: "Mantén los codos apuntando hacia arriba y cerrados cerca de la cabeza." },
+                
+                // AQUÍ ESTÁ EL CAMBIO: Nombre simplificado a 'copa.png'
+                { id: "tri_cup", name: "Extensión Copa", group: "TRÍCEPS", equip: "1 Mancuerna pesada", img: "copa.png", notes: "Mantén los codos apuntando hacia arriba y cerrados cerca de la cabeza." },
+                
                 { id: "tri_trx", name: "Extensión de Tríceps TRX", group: "TRÍCEPS", equip: "TRX", img: "Extension Triceps TRX.png", notes: "Cuerpo rígido. Flexiona codos llevando las manos a tu frente." },
 
                 { id: "core_plk", name: "Plancha", group: "CORE", equip: "Suelo", img: "Plancha.png", notes: "Apoya antebrazos y puntas de los pies. Mantén el cuerpo alineado (como una tabla) desde la cabeza a los talones, contrayendo abdomen y glúteos para no arquear la zona lumbar." },
@@ -625,7 +628,6 @@
                 isAdmin() { return this.user?.role === 'ADMIN'; }
             },
             
-            // EL RESTO DEL CÓDIGO (UI, CHARTS) SE MANTIENE IGUAL
             UI: {
                 charts: {},
                 initApp() {
@@ -732,6 +734,10 @@
                         
                         const imgEl = document.getElementById('preview-img');
                         imgEl.src = ex.img;
+                        // MEJORA: Si falla la imagen, poner el icono base64
+                        imgEl.onerror = function() {
+                            this.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTJlOGYwIiBzdHJva2Utd2lkdGg9IjIiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIi8+PGNpcmNsZSBjeD0iOC41IiBjeT0iOC41IiByPSIxLjUiLz48cG9seWxpbmUgcG9pbnRzPSIyMSAxNSAxNiAxMCA1IDIxIi8+PC9zdmc+';
+                        };
                         imgEl.style.display = 'block'; 
 
                         card.classList.remove('hidden'); 
