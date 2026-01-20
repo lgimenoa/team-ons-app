@@ -188,6 +188,15 @@
                     <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
                 </div>
 
+                <div class="bg-yellow-50 rounded-3xl border border-yellow-200 p-6 mb-6">
+                    <h3 class="font-bold text-yellow-900 mb-4 flex items-center gap-2"><i data-lucide="database" class="w-5 h-5"></i> Copia de Seguridad</h3>
+                    <div class="flex flex-col gap-3">
+                        <button onclick="ONS.Backup.downloadJSON()" class="w-full bg-white text-yellow-900 px-5 py-4 rounded-xl text-sm border border-yellow-200 flex items-center justify-center gap-2 font-bold shadow-sm hover:bg-yellow-100 transition"><i data-lucide="download" class="w-5 h-5"></i> Descargar Datos (Cloud)</button>
+                        <label class="w-full bg-yellow-600 text-white px-5 py-4 rounded-xl text-sm flex items-center justify-center gap-2 cursor-pointer font-bold shadow hover:bg-yellow-700 transition"><i data-lucide="upload" class="w-5 h-5"></i> Restaurar a la Nube<input type="file" class="hidden" onchange="ONS.Backup.uploadJSON(this)"></label>
+                    </div>
+                    <p id="backup-status" class="text-center text-xs text-yellow-800/60 mt-3 font-medium"></p>
+                </div>
+
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                     <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm"><div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Miembros</div><div id="adm-stat-users" class="text-2xl font-bold text-blue-900 mt-1">0</div></div>
                     <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm"><div class="text-[10px] text-green-600 font-bold uppercase tracking-wider">Activos</div><div id="adm-stat-active" class="text-2xl font-bold text-green-900 mt-1">0</div></div>
@@ -457,7 +466,6 @@
                 { id: "tri_oh", name: "Jalón tras nuca Polea", group: "TRÍCEPS", equip: "Polea Alta + Cuerda", img: "Jalon por Encima de la Cabeza.png", notes: "De espaldas a la máquina. Da un paso adelante para estabilidad." },
                 { id: "tri_dips", name: "Fondos en Banco (Dips)", group: "TRÍCEPS", equip: "Banco", img: "Frondos en Banco.png", notes: "Manos en el borde del banco, pies en el suelo. Baja el glúteo cerca del banco." },
                 
-                // AQUÍ ESTÁ EL CAMBIO: Nombre simplificado a 'copa.png'
                 { id: "tri_cup", name: "Extensión Copa", group: "TRÍCEPS", equip: "1 Mancuerna pesada", img: "copa.png", notes: "Mantén los codos apuntando hacia arriba y cerrados cerca de la cabeza." },
                 
                 { id: "tri_trx", name: "Extensión de Tríceps TRX", group: "TRÍCEPS", equip: "TRX", img: "Extension Triceps TRX.png", notes: "Cuerpo rígido. Flexiona codos llevando las manos a tu frente." },
@@ -621,6 +629,44 @@
                 }
             },
             
+            // NUEVO OBJETO BACKUP (RESTORED & ADAPTED FOR CLOUD)
+            Backup: {
+                downloadJSON() {
+                    try {
+                        // Descargar lo que hay en el estado actual (que viene de Firebase)
+                        const data = {
+                            users: ONS.DataStore.state.users,
+                            logs: ONS.DataStore.state.logs,
+                            exportedAt: new Date().toISOString()
+                        };
+                        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                        const a = document.createElement('a'); 
+                        a.href = URL.createObjectURL(blob); 
+                        a.download = `ONS_Backup_${new Date().toISOString().slice(0,10)}.json`; 
+                        a.click();
+                        document.getElementById('backup-status').textContent = `Backup generado (${data.logs.length} logs).`;
+                    } catch(e) { console.error("Backup Error:", e); alert("Error generando backup."); }
+                },
+                uploadJSON(input) {
+                    const file = input.files[0]; if (!file) return; const reader = new FileReader();
+                    reader.onload = e => { 
+                        try { 
+                            const data = JSON.parse(e.target.result); 
+                            if (!confirm(`¿Estás seguro de IMPORTAR estos datos a la NUBE?\n\nUsuarios: ${data.users?.length || 0}\nRegistros: ${data.logs?.length || 0}`)) return;
+                            
+                            // Subir a Firebase uno a uno
+                            let count = 0;
+                            if (data.users) data.users.forEach(r => { firebase.database().ref('users/' + r.userId).set(r); count++; });
+                            if (data.logs) data.logs.forEach(r => { firebase.database().ref('logs/' + r.logId).set(r); count++; });
+                            
+                            alert(`Importación lanzada (${count} registros). La pantalla se actualizará sola.`);
+                            input.value = ''; // Limpiar input
+                        } catch(err) { alert("Error: " + err.message); } 
+                    }; 
+                    reader.readAsText(file);
+                }
+            },
+            
             Auth: {
                 user: null,
                 login(e) { e.preventDefault(); const u = ONS.DataStore.findUser({ user: document.getElementById('login-user').value, pass: document.getElementById('login-pass').value }); if (u) { this.user = u; ONS.UI.initApp(); } else alert("Credenciales inválidas o cargando datos..."); },
@@ -734,7 +780,6 @@
                         
                         const imgEl = document.getElementById('preview-img');
                         imgEl.src = ex.img;
-                        // MEJORA: Si falla la imagen, poner el icono base64
                         imgEl.onerror = function() {
                             this.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTJlOGYwIiBzdHJva2Utd2lkdGg9IjIiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIi8+PGNpcmNsZSBjeD0iOC41IiBjeT0iOC41IiByPSIxLjUiLz48cG9seWxpbmUgcG9pbnRzPSIyMSAxNSAxNiAxMCA1IDIxIi8+PC9zdmc+';
                         };
